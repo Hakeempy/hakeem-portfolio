@@ -16,15 +16,33 @@ Where each project came from, so the source of every case study is easy to find 
 | tmdb-pandas | TMDB Movie Data Analysis | `.../DE-Projects-dev` | [LAB-1 @ dev](https://github.com/Hakeemwiki/LAB-1/tree/dev) |
 | inventory-order-sql | Inventory & Order Management (SQL) | `.../DE-Projects-Lab-2` | [LAB-1 @ Lab-2](https://github.com/Hakeemwiki/LAB-1/tree/Lab-2) |
 
-## Still to add (from the resume, source not found yet)
+## Still to add
+
+From the resume. These live in the `Hakeempy` repos.
 
 - FIFA 22 Career Mode Dashboard (Power BI)
 - Social Media Data Analysis Dashboard (Power BI)
 - AWS Serverless Data Lake for E-commerce (S3, Lambda, Glue, Athena, QuickSight)
 - RAG chatbots (LangChain, Gemini) from Ghana Techlab
-- Projects that are only on GitHub
 
-## Open questions
+Public `github.com/Hakeempy` repos to go through for analysis and ML projects:
 
-- The resume links `github.com/Hakeempy`, but these repos are under `github.com/Hakeemwiki`. Which one should the site link to?
-- What date did the Amalitech role end? It's set to 2025-09 for now.
+| Repo | Language | Last updated |
+| --- | --- | --- |
+| Jinx | Python | 2026-07 |
+| PROJECTS | | 2026-04 |
+| Projects-Data-Science | Jupyter | 2025-10 |
+| Dashboard-WebApp | Python | 2024-09 |
+| Machine-Learning | Jupyter | 2024-08 |
+| Datasets-DA | | 2024-08 |
+| ML-WEB-APP | Python | 2024-08 |
+| DATA-ANALYSIS-PROJECTS | Jupyter | 2024-08 |
+| Portfolio_Projects | | 2024-01 |
+| ML-Apps | Python | 2023-06 |
+| web-app-streamlit | Python | 2023-06 |
+| TechLab-Project | HTML | 2022-12 |
+
+## Decisions
+
+- The site's GitHub profile link is `github.com/Hakeempy`. Project repo links point to wherever each repo actually lives.
+- The Amalitech role is shown as ending 2025-09.
