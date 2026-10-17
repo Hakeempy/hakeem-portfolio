@@ -16,6 +16,11 @@ export type ProjectMeta = {
   repo?: string;
   demo?: string;
   cover?: string;
+  coverAlt?: string;
+  /** CSS object-position for the cover's tight crop */
+  focus?: string;
+  /** One true, short fact shown beside the title */
+  fact: string;
   featured: boolean;
   order: number;
 };
@@ -37,6 +42,9 @@ function readProject(file: string): Project {
     repo: data.repo,
     demo: data.demo,
     cover: data.cover,
+    coverAlt: data.coverAlt,
+    focus: data.focus,
+    fact: data.fact ?? "",
     featured: data.featured ?? false,
     order: data.order ?? 999,
     body: content,
@@ -53,6 +61,10 @@ export function getAllProjects(): Project[] {
 
 export function getFeaturedProjects(): Project[] {
   return getAllProjects().filter((project) => project.featured);
+}
+
+export function getOtherProjects(): Project[] {
+  return getAllProjects().filter((project) => !project.featured);
 }
 
 export function getProject(slug: string): Project | undefined {

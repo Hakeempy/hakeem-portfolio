@@ -1,54 +1,54 @@
-import Link from "next/link";
-import { site } from "@/data/site";
-import { experience } from "@/data/experience";
-import { getFeaturedProjects } from "@/lib/projects";
+import { Hero } from "@/components/sections/Hero";
+import { WorkPanels } from "@/components/sections/WorkPanels";
+import { LivePipeline } from "@/components/sections/LivePipeline";
+import { WorkList } from "@/components/sections/WorkList";
+import { Path } from "@/components/sections/Path";
+import { Teaching } from "@/components/sections/Teaching";
+import { Contact } from "@/components/sections/Contact";
+import { Footer } from "@/components/sections/Footer";
+import { getFeaturedProjects, getOtherProjects } from "@/lib/projects";
 
-// Wireframe only: sections in order, no styling yet.
+// Covers that are white by nature (AWS consoles, Airflow) get the room's dimmer treatment.
+const isLight = (cover?: string) => !!cover && !/grafana/.test(cover);
+
 export default function Home() {
-  const featured = getFeaturedProjects();
+  const featured = getFeaturedProjects().map(
+    ({ slug, title, year, fact, cover, coverAlt, focus }) => ({
+      slug,
+      title,
+      year,
+      fact,
+      cover,
+      coverAlt,
+      focus,
+      light: isLight(cover),
+    }),
+  );
+  const others = getOtherProjects().map(
+    ({ slug, title, summary, year, fact, stack, cover, coverAlt }) => ({
+      slug,
+      title,
+      summary,
+      year,
+      fact,
+      stack,
+      cover,
+      coverAlt,
+    }),
+  );
 
   return (
-    <main className="mx-auto w-full max-w-3xl space-y-16 px-4 py-16">
-      <section>
-        <h1 className="text-3xl font-semibold">{site.name}</h1>
-        <p>{site.role}</p>
-        <p>{site.tagline}</p>
-      </section>
-
-      <section>
-        <h2 className="text-xl font-semibold">Selected work</h2>
-        <ul>
-          {featured.map((project) => (
-            <li key={project.slug}>
-              <Link href={`/projects/${project.slug}`} className="underline">
-                {project.title}
-              </Link>
-              <p>{project.summary}</p>
-            </li>
-          ))}
-        </ul>
-        <Link href="/projects" className="underline">
-          All projects
-        </Link>
-      </section>
-
-      <section>
-        <h2 className="text-xl font-semibold">Experience</h2>
-        <ul>
-          {experience.map((role) => (
-            <li key={`${role.company}-${role.start}`}>
-              {role.title}, {role.company} ({role.start} to {role.end})
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section>
-        <h2 className="text-xl font-semibold">Contact</h2>
-        <a href={`mailto:${site.email}`} className="underline">
-          {site.email}
-        </a>
-      </section>
-    </main>
+    <>
+      <Hero />
+      <main>
+        <WorkPanels projects={featured} />
+        <LivePipeline />
+        <WorkList projects={others} />
+        <Path />
+        <Teaching />
+        <Contact />
+      </main>
+      <Footer />
+    </>
   );
 }

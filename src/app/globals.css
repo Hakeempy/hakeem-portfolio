@@ -1,24 +1,198 @@
 @import "tailwindcss";
 
-/* Placeholder tokens. The real palette and type scale come in the design pass. */
+/*
+ * The dark room. One warm black field, lit things in it, gold used once per screen.
+ * See docs/design-brief.md.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --bg: #0c0a08;
+  --surface: #181512;
+  --surface-2: #231f1b;
+  --ink: #f4f4f3;
+  --muted: #a39d96;
+  --accent: #c9a45a;
+  --accent-ink: #0c0a08;
+  --field: #ece7df;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Five type steps, no more */
+  --step-small: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
+  --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --step-lead: clamp(1.25rem, 0.9rem + 1.2vw, 2.25rem);
+  --step-head: clamp(2rem, 1.3rem + 3.2vw, 4.5rem);
+  --step-display: clamp(3.5rem, 12vw, 11.25rem);
+
+  --margin: clamp(20px, 2.1vw, 30px);
+  --gap: clamp(12px, 1.4vw, 20px);
+  --section: clamp(120px, 14vw, 220px);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
+  --t-press: 140ms;
+  --t-hover: 180ms;
+  --t-ui: 240ms;
+  --t-reveal: 800ms;
+
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-field: var(--field);
+  --font-sans: "Switzer", ui-sans-serif, system-ui, sans-serif;
+  --text-small: var(--step-small);
+  --text-body: var(--step-body);
+  --text-lead: var(--step-lead);
+  --text-head: var(--step-head);
+  --text-display: var(--step-display);
+  --spacing-margin: var(--margin);
+  --spacing-section: var(--section);
+}
+
+html {
+  background: var(--bg);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--step-body);
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+  font-feature-settings: "tnum" 0;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.display {
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+/* Screens that are light by nature (AWS consoles, Airflow) sit a step down in the dark room */
+.lit-light {
+  filter: brightness(0.86) contrast(1.05);
+}
+
+.found-photo {
+  filter: grayscale(1) brightness(0.62) contrast(1.05);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    transform var(--t-press) var(--ease-out),
+    background-color var(--t-hover) ease;
+}
+
+.button:hover {
+  background: #d8b56c;
+}
+
+.button:active {
+  transform: scale(0.97);
+}
+
+.link {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.22em;
+  text-decoration-thickness: 0.07em;
+  transition: text-decoration-color var(--t-hover) ease, color var(--t-hover) ease;
+}
+
+.link:hover {
+  text-decoration-color: currentColor;
+}
+
+.sr-only-heading {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/*
+ * Entrances. Content is visible by default; the hidden state only applies when the
+ * browser runs scripts, so nothing stays hidden without them.
+ */
+@media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 700ms var(--ease-out),
+      transform 900ms var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 80ms);
+  }
+
+  [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  [data-reveal="shutter"] {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 1100ms var(--ease-in-out);
+    transition-delay: calc(var(--i, 0) * 80ms);
+  }
+
+  [data-reveal="shutter"] img {
+    transform: scale(1.12);
+    transition: transform 1500ms var(--ease-soft);
+  }
+
+  [data-reveal="shutter"].is-in {
+    clip-path: inset(0 0 0 0);
+  }
+
+  [data-reveal="shutter"].is-in img {
+    transform: scale(1);
+  }
+
+  [data-rise] {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: rise var(--t-reveal) var(--ease-out) forwards;
+    animation-delay: calc(var(--i, 0) * 90ms + 150ms);
+  }
+}
+
+@keyframes rise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
