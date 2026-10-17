@@ -1,6 +1,6 @@
 ---
 title: Music Streaming Analytics Pipeline
-summary: Event-driven ETL that validates streaming data from S3, computes daily genre KPIs with Glue and Spark, and serves them from DynamoDB, all orchestrated by MWAA.
+summary: "Airflow on MWAA validates listening data, computes daily genre KPIs with Glue and Spark, and serves them from DynamoDB."
 category: data-engineering
 stack: [Apache Airflow (MWAA), AWS Glue, Apache Spark, S3, DynamoDB]
 year: 2025
@@ -13,10 +13,41 @@ coverAlt: "Airflow grid and graph view of the music streaming ETL DAG, from wait
 focus: "70% 62%"
 ---
 
-## Problem
+## The problem
 
-TODO
+A music streaming service receives batches of listening data in S3 at unpredictable times. The
+business wants daily numbers for each genre (how many streams, how many listeners, how long they
+listen), the top songs in each genre and the top genres of the day, and wants them in a database
+applications can read in milliseconds. Bad files must never reach those numbers.
 
-## Architecture
+## How it works
 
-TODO
+An Airflow DAG on Amazon MWAA runs every 15 minutes, with seven tasks:
+
+1. `wait_for_new_data` is an S3 sensor that checks for new files every 60 seconds, for up to an hour.
+2. `validate_data` runs a Glue Python Shell job that checks each file's columns, nulls and types.
+   Valid files are copied to `validated/`; invalid ones move to `logs/invalid/` with the reason.
+3. `branch_after_validation` decides what happens next. If validation failed, the run goes straight to
+   `end_pipeline` and the remaining tasks are skipped.
+4. `transform_metrics` runs a Glue Spark job that joins streams with songs and computes, per genre and
+   day, total streams, unique listeners, total listening time and average listening time per user,
+   plus the top three songs per genre and the top five genres per day.
+5. `load_to_dynamodb` writes the results to three DynamoDB tables.
+6. `archive_file` moves the processed files to `archive/`.
+
+## Decisions worth explaining
+
+- **A branch instead of a failure.** A bad file is an expected event, not an error, so the DAG
+  branches around the rest of the pipeline and skips it cleanly. A red run in Airflow then means
+  something actually broke.
+- **Tables shaped by their reads.** `genre_metrics` and `top_3_songs` are keyed by genre and date, so
+  an app can ask "how did hip-hop do on Tuesday" in one lookup. `top_5_genres` is keyed by date first,
+  because that question is "what were the top genres today".
+- **The right Glue job for each step.** Validation and loading are light, so they run as cheaper Python
+  Shell jobs; only the transformation needs Spark.
+
+## What I would change next
+
+The sensor polls S3 every minute even when nothing arrives. Triggering the DAG from an EventBridge
+rule on new uploads would react faster and cost less, and I would make the load step idempotent so a
+rerun after a partial failure is always safe.

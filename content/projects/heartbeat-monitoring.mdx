@@ -13,10 +13,38 @@ coverAlt: "Grafana dashboard showing 34,978 heart-rate records, minimum 50 and m
 focus: "30% 30%"
 ---
 
-## Problem
+## The problem
 
-TODO
+Health monitoring is a good test for a streaming system: readings never stop, every one belongs to a
+person, and an unusual value is only useful if someone sees it quickly. I built the whole path, from a
+reading being produced to it appearing on a live dashboard, using synthetic heart-rate data for 1,000
+customers.
 
-## Architecture
+## How it works
 
-TODO
+1. A generator produces readings for random customers. 90% fall in the normal 60 to 100 bpm range;
+   the other 10% are deliberate outliers between 50 and 59 or 101 and 120, so there is something for
+   the dashboard to flag.
+2. A producer sends the readings to a Kafka topic called `heartbeats`.
+3. A consumer in its own consumer group reads the topic and writes each reading to PostgreSQL.
+4. Grafana queries PostgreSQL and refreshes every five seconds. Kafka-UI shows the topic itself.
+
+Seven services run together under Docker Compose: ZooKeeper, Kafka, PostgreSQL, Kafka-UI, the
+producer, the consumer and Grafana. The dashboard in the screenshot had stored 34,978 readings.
+
+## Decisions worth explaining
+
+- **The database is the last line of defence.** The `heartbeats` table has a check constraint that
+  rejects any heart rate outside 1 to 300, whatever the consumer lets through.
+- **Indexes for the questions the dashboard asks.** Grafana filters by time and by customer, so both
+  `timestamp` and `customer_id` are indexed.
+- **A consumer group, not a bare consumer.** Kafka tracks the group's offsets, so a restarted consumer
+  carries on where it stopped instead of starting again from the beginning.
+- **Startup order.** The producer used to fail with `NoBrokersAvailable` because it started before
+  Kafka was ready. A start delay fixed it; health checks are the cleaner fix.
+
+## What I would change next
+
+The consumer commits offsets automatically, so a crash at the wrong moment could lose a reading.
+Committing after the database insert would make delivery at-least-once. I would also batch the
+inserts, add a second partition and consumer, and turn the outlier panel into a Grafana alert.

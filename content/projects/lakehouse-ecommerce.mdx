@@ -1,6 +1,6 @@
 ---
 title: Lakehouse Architecture for E-Commerce
-summary: A production-style lakehouse on AWS with Glue, Spark and Delta Lake, orchestrated by Step Functions and queried in Athena, with CI/CD.
+summary: "A lakehouse on AWS: Glue, Spark and Delta Lake jobs run by Step Functions, queried in Athena, deployed by CI/CD."
 category: data-engineering
 stack: [S3, AWS Glue, Apache Spark, Delta Lake, Step Functions, Athena, GitHub Actions]
 year: 2025
@@ -13,14 +13,44 @@ coverAlt: "AWS Step Functions graph running products, orders and order-items Glu
 focus: "62% 40%"
 ---
 
-## Problem
+## The problem
 
-TODO
+An e-commerce platform drops its products, orders and order items into S3 as a mix of CSV files and
+Excel workbooks with several sheets each. Before anyone can trust a number from that data, it has to
+be cleaned, checked against its schema, kept consistent between tables, deduplicated, and stored so
+that a rerun never creates duplicates. The platform also needed it all to run without someone
+watching.
 
-## Architecture
+## How it works
 
-TODO
+The data moves through zones in one S3 bucket: `raw`, `preprocessed`, `warehouse`, `rejected` and
+`archive`.
 
-## What I learned
+1. A Glue job turns every Excel sheet into its own CSV file in the `preprocessed` zone.
+2. A Step Functions state machine checks, through a Lambda, which kinds of file have arrived, then
+   runs the products, orders and order items Glue jobs in parallel.
+3. Each job enforces its schema, rejects rows with a missing key or a bad timestamp into the
+   `rejected` zone, checks that order items point at real orders and products, and merges the rest into
+   Delta Lake tables.
+4. Glue crawlers update the Data Catalog, and an Athena query confirms the new data can be read.
+5. SNS reports success or failure, and the original files are archived.
 
-TODO
+## Decisions worth explaining
+
+- **Delta Lake merges instead of overwrites.** Upserting on each table's key makes every job
+  idempotent: running it twice on the same files gives the same tables. That makes retries safe, which
+  matters when Step Functions retries a failed step on its own.
+- **Partitioning by how the data is read.** Products are partitioned by `department_id`, orders and
+  order items by `date`, because those are the filters most queries use.
+- **Rejected rows are kept, not deleted.** Every job writes its input, output and rejected row counts to
+  S3, and the rejected rows themselves sit in their own zone. When a number looks wrong, there is a
+  trail to follow.
+- **Shared code in one place.** Validation and archiving live in `utils.py`, passed to every Glue job,
+  so the rules cannot drift apart between jobs.
+- **CI/CD for the pipeline itself.** GitHub Actions runs the unit tests and deploys the state machine
+  definition on every push to `main`.
+
+## What I would change next
+
+The checks are written by hand in each job. I would move them into a data quality framework such as
+Deequ, so the rules are declared once and every run produces a quality report alongside its data.

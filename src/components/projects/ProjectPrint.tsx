@@ -58,7 +58,7 @@ export function ProjectPrint({
         <Heading
           data-reveal
           style={{ "--i": 1 } as React.CSSProperties}
-          className="text-lead leading-tight font-medium tracking-[-0.015em] [text-wrap:balance]"
+          className={`${showSummary ? "text-lead" : "text-body"} leading-tight font-medium tracking-[-0.015em] [text-wrap:balance]`}
         >
           <Link href={href} className="link">
             {project.title}

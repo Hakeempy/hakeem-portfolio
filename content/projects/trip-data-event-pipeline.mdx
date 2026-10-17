@@ -13,14 +13,46 @@ coverAlt: "DynamoDB table of completed trips with pickup and dropoff times, fare
 focus: "40% 30%"
 ---
 
-## Problem
+## The problem
 
-TODO: the business problem, in Hakeem's words.
+A ride-sharing platform needs to know how the day is going while it is still going: revenue, trip
+counts, the average fare, and the highest and lowest fares, which are often the first sign of a
+pricing error or fraud. The data arrives as two separate events per trip, one when it starts and one
+when it ends, in no guaranteed order. Doing this by hand is slow and error-prone, so the job was to
+automate it from the first event to the daily numbers.
 
-## Architecture
+You can try a small version of this pipeline on the [home page](/#try).
 
-TODO: diagram and data flow.
+## How it works
 
-## What I learned
+1. `send_to_kinesis.py` reads the trip start and trip end files, checks each record, and sends them in
+   batches to a Kinesis stream. Records that fail go to `failed/start/` or `failed/end/` in S3, so
+   nothing is silently dropped.
+2. Two Lambda functions read the stream. One writes start events to DynamoDB with a `RAW#START#` sort
+   key, the other writes end events under `RAW#END#`. Both reject events with missing fields, badly
+   formatted timestamps or non-numeric fares.
+3. A third Lambda, `match_and_complete`, runs on the DynamoDB stream. When either half of a trip lands,
+   it looks for the other half under the same `trip_id`. When both are there, it merges them into one
+   `COMPLETED#` record and deletes the raw pair, retrying the delete up to three times.
+4. Every night at 01:00 GMT, EventBridge starts a Glue job that reads the completed trips and writes
+   the day's KPIs (trip count, total, average, maximum and minimum fare) to S3, partitioned by date.
+5. A Glue crawler catalogues the output so the KPIs can be queried in Athena.
 
-TODO
+## Decisions worth explaining
+
+- **One table, two kinds of record.** Raw events and completed trips share the `TripData` table, told
+  apart by the sort-key prefix. A single query on `trip_id` with `begins_with` finds whatever exists
+  for a trip, which is exactly what the matcher needs.
+- **Order does not matter.** Real events arrive out of order, so the matcher works from whichever half
+  arrives second rather than assuming the start comes first.
+- **Duplicates are dropped, not counted.** Before writing a completed trip, the matcher checks whether
+  one already exists for that `trip_id`. If it does, it only cleans up the raw records. A replayed
+  stream cannot inflate the day's revenue.
+- **Tested without AWS.** The Lambdas and the KPI job have unit tests that run against `moto`, so the
+  logic is checked on every push before GitHub Actions deploys it.
+
+## What I would change next
+
+The Glue job scans the whole table to find completed trips. That is fine at this size but grows with
+the table. Next I would add a secondary index on status and pickup date, so the nightly job reads only
+the day it is computing.

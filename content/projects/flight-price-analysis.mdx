@@ -1,6 +1,6 @@
 ---
 title: Flight Price Analysis
-summary: Airflow-orchestrated pipeline from MySQL staging to PostgreSQL KPIs, covering fares by airline, seasonal variation and popular routes, visualized in Grafana.
+summary: "Airflow pipeline that turns 57,000 Bangladeshi flight fares in MySQL into PostgreSQL KPIs and a Grafana dashboard."
 category: data-engineering
 stack: [Apache Airflow, MySQL, PostgreSQL, Grafana, Docker]
 year: 2025
@@ -13,10 +13,45 @@ coverAlt: "Grafana dashboard of flight prices: 57,000 records, 24 airlines, aver
 focus: "45% 70%"
 ---
 
-## Problem
+## The problem
 
-TODO
+Airlines and travel agencies want to know how flight prices behave: which airlines charge the most,
+how fares change in peak seasons such as Eid, Hajj and winter, and which routes are booked most. The
+source was a flight price dataset for Bangladesh with 57,000 records across 24 airlines, with fares in
+Bangladeshi taka. The goal was a repeatable pipeline from that raw file to a dashboard stakeholders
+can read.
 
-## Architecture
+## How it works
 
-TODO
+An Airflow DAG runs four tasks in order, each retried twice, a minute apart, if it fails.
+
+1. **Ingest:** load the CSV into a MySQL staging table, checking that every expected column is there.
+2. **Validate:** check for nulls and wrong types, flag negative fares, unknown seasons (anything
+   other than Regular, Eid, Hajj or Winter) and duplicate rows, and write the invalid records to their
+   own table instead of deleting them.
+3. **Transform:** fill in missing total fares and compute five KPIs: average fare by airline, peak
+   against off-peak fares, fares by season, booking counts, and the most popular routes.
+4. **Load:** write each KPI to its own PostgreSQL table, which Grafana reads.
+
+MySQL, PostgreSQL, Airflow and Grafana all run under Docker Compose.
+
+## What the data showed
+
+Among the five most expensive airlines, the average fares sat close together, from ৳60,335 for Thai
+Airways to ৳62,713 for Turkish Airlines. The busiest destinations were Jeddah, Delhi, New York JFK,
+Singapore and Bangkok, each with between 3,036 and 3,071 bookings. Regular-season fares made up by far the
+largest share of the total, ahead of winter holidays, Hajj and Eid.
+
+## Decisions worth explaining
+
+- **Staging apart from serving.** MySQL holds the raw data exactly as it arrived, and the KPIs land in
+  their own PostgreSQL tables, so the dashboard never has to aggregate raw rows on the fly.
+- **Invalid rows are quarantined, not dropped.** They go to `flight_prices_raw_invalid_records`, so
+  someone can see what was wrong and why the totals look the way they do.
+- **One KPI, one table.** Each Grafana panel reads one small table, which keeps the dashboard queries
+  simple and fast.
+
+## What I would change next
+
+Every run replaces the tables completely, which is fine for one file but not for daily arrivals. Next I
+would load incrementally, put the DAG on a schedule, and add tests for the transformation logic.

@@ -1,6 +1,6 @@
 ---
 title: Car Rental Marketplace Analytics on AWS
-summary: A serverless big data pipeline on EMR Serverless and Glue that computes marketplace KPIs for revenue, engagement and platform performance.
+summary: "Serverless Spark on EMR computes revenue, user and location KPIs, catalogued by Glue and queried in Athena."
 category: data-engineering
 stack: [EMR Serverless, AWS Glue, Athena, Step Functions, S3, PySpark]
 year: 2025
@@ -13,10 +13,41 @@ coverAlt: "Step Functions graph running parallel EMR Serverless Spark jobs, Glue
 focus: "50% 30%"
 ---
 
-## Problem
+## The problem
 
-TODO
+A car rental marketplace produces vehicle inventories, user profiles, location data and rental
+transactions every day. Its stakeholders want to compare locations and vehicle types by revenue, see
+how users spend and how often they rent, and follow revenue over time, without anyone having to run a
+Spark cluster.
 
-## Architecture
+## How it works
 
-TODO
+A Step Functions state machine runs the whole pipeline:
+
+1. **Two Spark jobs in parallel on EMR Serverless.** `vehicle_location_metrics` joins transactions with
+   vehicles and locations to compute revenue, transaction counts, average, highest and lowest
+   transaction values, unique vehicles per location, and rental duration by vehicle type.
+   `user_transaction_metrics` joins transactions with users to compute daily revenue and, for each
+   user, total spend, rental hours and how often they rent.
+2. Both jobs write Parquet to S3, partitioned for the queries that follow.
+3. After a short wait, three Glue crawlers run in parallel and update the Data Catalog.
+4. Athena runs a summary report, and the catalogue is ready for ad-hoc SQL, such as the top five
+   locations by revenue or the most rented vehicle type.
+
+## Decisions worth explaining
+
+- **EMR Serverless instead of a cluster.** The jobs run once and stop. Paying only for the time Spark is
+  working, with no cluster to size, patch or remember to shut down, fits a batch workload like this.
+- **Parallel where nothing depends on order.** The two Spark jobs read the same raw data but share no
+  output, so they run side by side; the crawlers do the same. The run takes as long as the slowest job,
+  not the sum of all of them.
+- **Each job can fail on its own.** Each Spark job has its own catch and fail state, so the execution
+  history shows exactly which one broke and why.
+- **Parquet over CSV.** Columnar files mean Athena scans only the columns a query needs, which makes
+  queries faster and cheaper, since Athena charges by data scanned.
+
+## What I would change next
+
+The fixed waits after the Spark jobs and the crawlers are a guess at how long they take. I would
+replace them with polling loops that check each job's and crawler's state, as my lakehouse pipeline
+does, so each step starts the moment the previous one finishes.

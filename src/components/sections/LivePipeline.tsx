@@ -24,12 +24,12 @@ type Trip = { tripId: string; pickup: string; estimate: string; dropoff: string;
 
 type Kpi = { date: string; count: number; total: number; max: number; min: number };
 
-/** Completed trips the visitor can change, keyed by trip_id like the DynamoDB table. */
+/** Completed trips, keyed by trip_id like the DynamoDB table. */
 type Completed = Record<string, { date: string; fare: number }>;
 
 type Result =
   | { ok: false; stage: 1; reason: string }
-  | { ok: true; trip: Trip; date: string; fare: number; upsert: boolean };
+  | { ok: true; trip: Trip; date: string; fare: number; duplicate: boolean };
 
 function run(trip: Trip, completed: Completed): Result {
   const missing = (["tripId", "pickup", "estimate", "dropoff", "fare"] as const).find(
@@ -54,17 +54,19 @@ function run(trip: Trip, completed: Completed): Result {
   if (!isNumeric(trip.fare))
     return { ok: false, stage: 1, reason: "Rejected: fare_amount must be a number." };
 
+  const existing = completed[trip.tripId.trim()];
   return {
     ok: true,
     trip,
-    date: trip.pickup.trim().slice(0, 10),
+    // A duplicate is reported against the day its first, kept record belongs to.
+    date: existing ? existing.date : trip.pickup.trim().slice(0, 10),
     fare: Number(trip.fare),
-    upsert: trip.tripId.trim() in completed,
+    duplicate: Boolean(existing),
   };
 }
 
-// The day's other 4,998 trips stay fixed; the first trip in the data starts in `completed`
-// so the visitor can overwrite it, as a second write with the same key would in DynamoDB.
+// The day's other 4,998 trips stay fixed; the first trip in the data starts in `completed`,
+// so sending it again shows the duplicate check at work.
 const others = {
   date: tripDay.date,
   count: tripDay.tripCount - 1,
@@ -132,7 +134,8 @@ export function LivePipeline() {
       timers.current.push(
         window.setTimeout(() => {
           setStep(i);
-          if (i === 3 && r.ok) {
+          // Like match_and_complete in Lab7: a trip_id that is already COMPLETED is not written again.
+          if (i === 3 && r.ok && !r.duplicate) {
             setCompleted((prev) => ({ ...prev, [r.trip.tripId.trim()]: { date: r.date, fare: r.fare } }));
             setChangedDate(r.date);
           }
@@ -288,8 +291,8 @@ function StageOutput({ index, result, days }: { index: number; result: Result; d
     (() => {
       const count = days.find((d) => d.date === result.date)?.count ?? 1;
       const trips = `${count.toLocaleString("en-US")} ${count === 1 ? "trip" : "trips"}`;
-      return result.upsert
-        ? `${result.trip.tripId.trim()} was already completed, so it was overwritten, not counted twice. ${result.date}: ${trips}.`
+      return result.duplicate
+        ? `${result.trip.tripId.trim()} is already completed, so the duplicate was dropped. Still ${trips}.`
         : `${result.date}: now ${trips}.`;
     })(),
   ];
