@@ -10,7 +10,12 @@ export const metadata: Metadata = {
     "Every project Hakeem Wikireh has built: data pipelines on Kafka, Spark, Airflow and AWS, the analysis before them, and the models in between.",
 };
 
-const groups: { id: string; category: ProjectCategory; title: string; line: string }[] = [
+const groups: {
+  id: string;
+  category: ProjectCategory;
+  title: string;
+  line: string;
+}[] = [
   {
     id: "engineering",
     category: "data-engineering",
@@ -33,33 +38,40 @@ const groups: { id: string; category: ProjectCategory; title: string; line: stri
 
 /*
  * The hang. Prints are placed in pairs that alternate sides and sizes, the smaller one dropped
- * lower, like screens pinned up on a wall at different heights. One column on phones and tablets,
- * where the smaller prints step in from alternate sides.
+ * lower, like screens pinned up on a wall at different heights. Every print is the same 3:2
+ * scene; only its size and place change. One column on phones and tablets, where the smaller
+ * prints step in from alternate sides.
  */
 const hang = [
-  {
-    place: "lg:col-span-7 lg:col-start-1",
-    aspect: "aspect-[3/2]",
-    sizes: "(min-width: 1024px) 58vw, 100vw",
-  },
-  {
-    place: "w-[78%] ml-auto lg:w-auto lg:ml-0 lg:col-span-4 lg:col-start-9 lg:mt-[9vw]",
-    aspect: "aspect-[4/5]",
-    sizes: "(min-width: 1024px) 33vw, 78vw",
-  },
-  {
-    place: "w-[78%] lg:w-auto lg:col-span-4 lg:col-start-2 lg:mt-[2vw]",
-    aspect: "aspect-[4/5]",
-    sizes: "(min-width: 1024px) 33vw, 78vw",
-  },
-  {
-    place: "lg:col-span-6 lg:col-start-7 lg:mt-[7vw]",
-    aspect: "aspect-[4/3]",
-    sizes: "(min-width: 1024px) 50vw, 100vw",
-  },
+  "lg:col-span-7 lg:col-start-1",
+  "w-[86%] ml-auto lg:w-auto lg:ml-0 lg:col-span-4 lg:col-start-9 lg:mt-[9vw]",
+  "w-[86%] lg:w-auto lg:col-span-5 lg:col-start-2 lg:mt-[2vw]",
+  "lg:col-span-6 lg:col-start-7 lg:mt-[7vw]",
 ];
 
-const numberWords = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"];
+const numberWords = [
+  "no",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "ten",
+  "eleven",
+  "twelve",
+  "thirteen",
+  "fourteen",
+  "fifteen",
+  "sixteen",
+  "seventeen",
+  "eighteen",
+  "nineteen",
+  "twenty",
+];
 const inWords = (n: number) => numberWords[n] ?? String(n);
 const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -69,7 +81,9 @@ export default function ProjectsPage() {
   const sections = groups
     .map((group) => ({
       ...group,
-      projects: projects.filter((project) => project.category === group.category),
+      projects: projects.filter(
+        (project) => project.category === group.category,
+      ),
     }))
     .filter((group) => group.projects.length > 0);
 
@@ -90,8 +104,8 @@ export default function ProjectsPage() {
             style={{ "--i": 2 } as React.CSSProperties}
             className="mt-8 max-w-[30ch] text-lead leading-[1.25] lg:col-span-6 lg:mt-12"
           >
-            {capitalise(inWords(projects.length))} projects since {since}. The pipelines come
-            first, then the analysis and models they grew out of.
+            {capitalise(inWords(projects.length))} projects since {since}. The
+            pipelines come first, then the analysis and models they grew out of.
           </p>
           <nav
             aria-label="Project groups"
@@ -125,7 +139,10 @@ export default function ProjectsPage() {
             className={`scroll-mt-8 px-margin ${g === sections.length - 1 ? "pb-section" : "pb-[clamp(96px,10vw,180px)]"}`}
           >
             <div className="mb-[clamp(40px,5vw,80px)] lg:grid lg:grid-cols-12 lg:items-end lg:gap-x-[var(--gap)]">
-              <h2 id={`${group.id}-heading`} className="display text-head font-medium lg:col-span-6">
+              <h2
+                id={`${group.id}-heading`}
+                className="display text-head font-medium lg:col-span-6"
+              >
                 {group.title}
               </h2>
               <p className="mt-4 max-w-[44ch] lg:col-span-4 lg:col-start-9 lg:mt-0">
@@ -135,10 +152,9 @@ export default function ProjectsPage() {
 
             <ul className="flex flex-col gap-y-[clamp(56px,5vw,96px)] lg:grid lg:grid-cols-12 lg:items-start lg:gap-x-[var(--gap)]">
               {group.projects.map((project, i) => {
-                const slot = hang[i % hang.length];
                 return (
-                  <li key={project.slug} className={slot.place}>
-                    <ProjectPrint project={project} aspect={slot.aspect} sizes={slot.sizes} />
+                  <li key={project.slug} className={hang[i % hang.length]}>
+                    <ProjectPrint project={project} />
                   </li>
                 );
               })}

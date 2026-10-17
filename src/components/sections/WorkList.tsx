@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { ProjectMeta } from "@/lib/projects";
 import { Reveal } from "@/components/motion/Reveal";
+import { ProjectScene } from "@/components/thumbs/ProjectScene";
 
 type ListProject = Pick<
   ProjectMeta,
@@ -15,8 +15,6 @@ type ListProject = Pick<
   | "year"
   | "fact"
   | "stack"
-  | "cover"
-  | "coverAlt"
 >;
 
 export function WorkList({ projects }: { projects: ListProject[] }) {
@@ -47,10 +45,16 @@ export function WorkList({ projects }: { projects: ListProject[] }) {
       aria-labelledby="all-work-heading"
       className="px-margin pb-section"
     >
+      {/* The heading sits above the pinned scene, so on phones the scene never covers it */}
       <div className="md:grid md:grid-cols-12 md:gap-x-[var(--gap)]">
-        {/* The picture: a band pinned to the top on phones, a sticky 4:5 print on desktop */}
+        <h2 id="all-work-heading" className="display mb-12 text-head md:col-span-5 md:col-start-7">
+          The rest of the work
+        </h2>
+      </div>
+      <div className="md:grid md:grid-cols-12 md:gap-x-[var(--gap)]">
+        {/* The active project's scene: pinned to the top on phones, a sticky print on desktop */}
         <div className="sticky top-0 z-10 -mx-margin bg-bg pb-4 md:top-[12vh] md:col-span-5 md:mx-0 md:self-start md:pb-0">
-          <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface md:aspect-[4/5] md:w-[34vw]">
+          <div className="relative aspect-[3/2] w-full overflow-hidden bg-surface md:w-[40vw]">
             <AnimatePresence initial={false}>
               <motion.div
                 key={current.slug}
@@ -60,19 +64,7 @@ export function WorkList({ projects }: { projects: ListProject[] }) {
                 exit={{ opacity: 0 }}
                 transition={{ duration: reduce ? 0 : 0.3, ease: "easeOut" }}
               >
-                {current.cover ? (
-                  <Image
-                    src={current.cover}
-                    alt={current.coverAlt ?? ""}
-                    fill
-                    sizes="(min-width: 768px) 34vw, 100vw"
-                    className="object-cover brightness-[0.88]"
-                  />
-                ) : (
-                  <div className="flex h-full items-end p-6">
-                    <p className="text-lead text-muted">{current.fact}</p>
-                  </div>
-                )}
+                <ProjectScene slug={current.slug} />
               </motion.div>
             </AnimatePresence>
           </div>
@@ -80,13 +72,6 @@ export function WorkList({ projects }: { projects: ListProject[] }) {
 
         <div className="mt-10 md:col-span-5 md:col-start-7 md:mt-0">
           <Reveal>
-            <h2
-              id="all-work-heading"
-              data-reveal
-              className="display mb-12 text-head"
-            >
-              The rest of the work
-            </h2>
             <ul>
               {projects.map((project, i) => {
                 const isActive = i === active;

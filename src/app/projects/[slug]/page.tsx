@@ -3,9 +3,9 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { getAllProjects, getProject } from "@/lib/projects";
-import { isLightScreen, projectScreens } from "@/data/screens";
+import { isLightScreen, projectScreens, type Screen } from "@/data/screens";
 import { SiteNav } from "@/components/projects/SiteNav";
-import { CoverPrint } from "@/components/projects/CoverPrint";
+import { ProjectScene } from "@/components/thumbs/ProjectScene";
 import { ProjectPrint } from "@/components/projects/ProjectPrint";
 import { PageClose } from "@/components/projects/PageClose";
 import { mdxComponents } from "@/components/projects/mdx";
@@ -30,15 +30,31 @@ function nextProjects(slug: string) {
   return [1, 2, 3].map((step) => all[(at + step) % all.length]);
 }
 
-export default async function ProjectPage(props: PageProps<"/projects/[slug]">) {
+export default async function ProjectPage(
+  props: PageProps<"/projects/[slug]">,
+) {
   const { slug } = await props.params;
   const project = getProject(slug);
   if (!project) notFound();
 
-  const screens = projectScreens[project.slug] ?? [];
+  // The project's own screenshots, the old cover first, shown whole under the write-up.
+  const cover: Screen[] =
+    project.cover && project.coverSize
+      ? [
+          {
+            src: project.cover,
+            size: project.coverSize,
+            alt: project.coverAlt ?? "",
+            caption: project.coverAlt ?? "",
+            light: isLightScreen(project.cover),
+          },
+        ]
+      : [];
+  const screens = [...cover, ...(projectScreens[project.slug] ?? [])];
   const [next, ...after] = nextProjects(project.slug);
   // Long titles step down a size on phones so they still hold to two lines.
-  const titleSize = project.title.length > 38 ? "text-lead sm:text-head" : "text-head";
+  const titleSize =
+    project.title.length > 38 ? "text-lead sm:text-head" : "text-head";
 
   return (
     <>
@@ -61,22 +77,15 @@ export default async function ProjectPage(props: PageProps<"/projects/[slug]">) 
           </p>
         </header>
 
-        {project.cover ? (
-          <div
-            data-rise
-            style={{ "--i": 3 } as React.CSSProperties}
-            className="mt-[clamp(32px,4vw,64px)] px-margin"
-          >
-            <CoverPrint
-              src={project.cover}
-              alt={project.coverAlt ?? ""}
-              focus={project.focus}
-              light={isLightScreen(project.cover)}
-              priority
-              className="aspect-[4/3] sm:aspect-[16/9] lg:aspect-[2/1]"
-            />
+        <div
+          data-rise
+          style={{ "--i": 3 } as React.CSSProperties}
+          className="mt-[clamp(32px,4vw,64px)] px-margin lg:grid lg:grid-cols-12 lg:gap-x-[var(--gap)]"
+        >
+          <div className="lg:col-span-8 lg:col-start-3">
+            <ProjectScene slug={project.slug} />
           </div>
-        ) : null}
+        </div>
 
         <section
           aria-label="About this project"
@@ -99,7 +108,11 @@ export default async function ProjectPage(props: PageProps<"/projects/[slug]">) 
                 </dd>
               </div>
               {(project.repo || project.demo) && (
-                <div data-reveal style={{ "--i": 2 } as React.CSSProperties} className="col-span-2 lg:col-span-1">
+                <div
+                  data-reveal
+                  style={{ "--i": 2 } as React.CSSProperties}
+                  className="col-span-2 lg:col-span-1"
+                >
                   <dt className="text-small text-muted">See it</dt>
                   <dd className="mt-1 space-y-1">
                     {project.repo && (
@@ -137,59 +150,77 @@ export default async function ProjectPage(props: PageProps<"/projects/[slug]">) 
         </section>
 
         {screens.length > 0 && (
-          <section aria-label="More screens from this pipeline" className="px-margin pb-section">
-            {screens.map((screen) => (
-              <Reveal key={screen.src} amount={0.25}>
-                <figure>
-                  {/* Shown whole, at its own proportions, so the numbers in it can be read */}
-                  <div
-                    data-reveal="shutter"
-                    className="relative overflow-hidden bg-surface"
-                    style={{ aspectRatio: `${screen.size[0]} / ${screen.size[1]}` }}
+          <section
+            aria-labelledby="screens-heading"
+            className="px-margin pb-section"
+          >
+            <h2
+              id="screens-heading"
+              className="display mb-[clamp(40px,5vw,80px)] text-head font-medium"
+            >
+              Inside the project
+            </h2>
+            <div className="space-y-[clamp(56px,6vw,112px)]">
+              {screens.map((screen) => (
+                <Reveal key={screen.src} amount={0.25}>
+                  {/* Small charts keep their own width instead of being blown up past it */}
+                  <figure
+                    style={{
+                      maxWidth:
+                        screen.size[0] >= 1600 ? undefined : screen.size[0],
+                    }}
                   >
-                    <Image
-                      src={screen.src}
-                      alt={screen.alt}
-                      fill
-                      sizes="100vw"
-                      className={`object-cover ${screen.light ? "lit-light" : ""}`}
-                    />
-                  </div>
-                  <figcaption
-                    data-reveal
-                    style={{ "--i": 1 } as React.CSSProperties}
-                    className="mt-4 max-w-[60ch] text-small text-muted"
-                  >
-                    {screen.caption}
-                  </figcaption>
-                </figure>
-              </Reveal>
-            ))}
+                    {/* Shown whole, at its own proportions, so the numbers in it can be read */}
+                    <div
+                      data-reveal="shutter"
+                      className="relative overflow-hidden bg-surface"
+                      style={{
+                        aspectRatio: `${screen.size[0]} / ${screen.size[1]}`,
+                      }}
+                    >
+                      <Image
+                        src={screen.src}
+                        alt={screen.alt}
+                        fill
+                        sizes="100vw"
+                        className={`object-cover ${screen.light ? "lit-light" : ""}`}
+                      />
+                    </div>
+                    <figcaption
+                      data-reveal
+                      style={{ "--i": 1 } as React.CSSProperties}
+                      className="mt-4 max-w-[60ch] text-small text-muted"
+                    >
+                      {screen.caption}
+                    </figcaption>
+                  </figure>
+                </Reveal>
+              ))}
+            </div>
           </section>
         )}
 
-        <section aria-labelledby="next-heading" className="px-margin pb-section">
-          <h2 id="next-heading" className="display mb-[clamp(40px,5vw,80px)] text-head font-medium">
+        <section
+          aria-labelledby="next-heading"
+          className="px-margin pb-section"
+        >
+          <h2
+            id="next-heading"
+            className="display mb-[clamp(40px,5vw,80px)] text-head font-medium"
+          >
             More work
           </h2>
           <div className="flex flex-col gap-y-16 lg:grid lg:grid-cols-12 lg:items-start lg:gap-x-[var(--gap)]">
             <div className="lg:col-span-7">
-              <ProjectPrint
-                project={next}
-                aspect="aspect-[3/2]"
-                sizes="(min-width: 1024px) 58vw, 100vw"
-                headingLevel="h3"
-              />
+              <ProjectPrint project={next} headingLevel="h3" />
             </div>
             <div className="flex flex-col gap-y-16 lg:col-span-4 lg:col-start-9 lg:mt-[10vw]">
               {after.map((project) => (
                 <ProjectPrint
                   key={project.slug}
                   project={project}
-                  aspect="aspect-[16/10]"
-                  sizes="(min-width: 1024px) 33vw, 100vw"
                   headingLevel="h3"
-                  showSummary={false}
+                  showHook={false}
                 />
               ))}
             </div>

@@ -8,34 +8,23 @@ import { Contact } from "@/components/sections/Contact";
 import { Footer } from "@/components/sections/Footer";
 import { getFeaturedProjects, getOtherProjects } from "@/lib/projects";
 
-// Covers that are white by nature (AWS consoles, Airflow) get the room's dimmer treatment.
-const isLight = (cover?: string) => !!cover && !/grafana/.test(cover);
-
 export default function Home() {
-  const featured = getFeaturedProjects().map(
-    ({ slug, title, year, fact, cover, coverAlt, focus }) => ({
-      slug,
-      title,
-      year,
-      fact,
-      cover,
-      coverAlt,
-      focus,
-      light: isLight(cover),
-    }),
-  );
-  const others = getOtherProjects().map(
-    ({ slug, title, summary, year, fact, stack, cover, coverAlt }) => ({
-      slug,
-      title,
-      summary,
-      year,
-      fact,
-      stack,
-      cover,
-      coverAlt,
-    }),
-  );
+  const featured = getFeaturedProjects().map(({ slug, title, hook, year, fact, stack }) => ({
+    slug,
+    title,
+    hook,
+    year,
+    fact,
+    stack,
+  }));
+  const others = getOtherProjects().map(({ slug, title, summary, year, fact, stack }) => ({
+    slug,
+    title,
+    summary,
+    year,
+    fact,
+    stack,
+  }));
 
   return (
     <>

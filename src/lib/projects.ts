@@ -17,8 +17,12 @@ export type ProjectMeta = {
   demo?: string;
   cover?: string;
   coverAlt?: string;
+  /** Pixel width and height of the cover screenshot, shown whole inside the case study */
+  coverSize?: [number, number];
   /** CSS object-position for the cover's tight crop */
   focus?: string;
+  /** One line that makes someone want to open the project, under its thumbnail */
+  hook: string;
   /** One true, short fact shown beside the title */
   fact: string;
   featured: boolean;
@@ -43,7 +47,9 @@ function readProject(file: string): Project {
     demo: data.demo,
     cover: data.cover,
     coverAlt: data.coverAlt,
+    coverSize: data.coverSize,
     focus: data.focus,
+    hook: data.hook ?? data.summary,
     fact: data.fact ?? "",
     featured: data.featured ?? false,
     order: data.order ?? 999,

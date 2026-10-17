@@ -6,7 +6,8 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { site } from "@/data/site";
 
-// Screens from Hakeem's own pipelines. The large print crossfades through them like light shifting in a room.
+// The two Grafana dashboards from Hakeem's own pipelines. The large print crossfades between them
+// like light shifting in a room.
 const screens = [
   {
     src: "/images/work/heartbeat-grafana.png",
@@ -19,18 +20,6 @@ const screens = [
     alt: "Grafana dashboard from the flight price pipeline: average fare by airline",
     focus: "18% 88%",
     light: false,
-  },
-  {
-    src: "/images/work/lakehouse-stepfn.png",
-    alt: "Step Functions graph from the lakehouse pipeline running Glue jobs in parallel",
-    focus: "52% 45%",
-    light: true,
-  },
-  {
-    src: "/images/work/ecommerce-dashboard.png",
-    alt: "Dashboard of daily revenue by product category from the e-commerce pipeline",
-    focus: "18% 45%",
-    light: true,
   },
 ];
 
