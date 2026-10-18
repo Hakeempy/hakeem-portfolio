@@ -15,6 +15,44 @@ coverAlt: "Bar chart of forest fires in Brazil by year, 1998 to 2017"
 focus: "50% 50%"
 ---
 
-## Problem
+## The problem
 
-TODO
+Public datasets are rarely ready to answer anything. Each project in this collection starts from one
+of them and a set of questions, and the work is the same every time: get the file into a state I can
+trust, then answer the questions plainly, in Python, SQL or Power BI.
+
+## How it works
+
+The repository holds 18 Jupyter notebooks, 4 SQL scripts and 7 Power BI reports. Most notebooks follow
+the same steps.
+
+1. Load the CSV file and check its shape, types, missing values and duplicates.
+2. Clean what is wrong. The Brazil forest fires data has its Portuguese month names translated to
+   English. The top 5,000 YouTube channels have `--` placeholders turned into proper missing values and
+   ranks like "1st" turned into numbers. Dates in the London housing and Netflix data become real dates.
+3. Answer each question in its own titled section with a group-by, filter or sort, and a chart where it
+   helps: which month, year and state had the most forest fires, how many confirmed cases, deaths and
+   recoveries each region recorded in the COVID-19 data, or the highest and lowest house prices in
+   England each year.
+4. The SQL scripts answer sets of questions against MySQL tables, among them Titanic passengers and
+   employee salaries, and one notebook creates and fills MySQL tables from Python.
+5. The Power BI reports cover Netflix titles, Premier League player and club statistics, medicine
+   reviews, Forbes celebrity rankings, team match statistics, and
+   [social media engagement](/projects/social-media-dashboard).
+
+## Decisions worth explaining
+
+- **Duplicates first.** The forest fires data had 32 duplicate rows out of 6,454. Removing them before
+  any totals were taken kept them from inflating every answer.
+- **Measure before dropping.** In the YouTube data, I worked out what share of each column was missing
+  before deciding to drop the incomplete rows.
+- **More than one route to an answer.** Several questions are answered two or three ways, for example
+  finding a Netflix title with `isin`, `==` and `str.contains`, to show when each one is the right tool.
+
+## What I would change next
+
+Some of this work shows its age. The forest fires notebook reports the number of rows as "the total
+number of fires registered", when the real total is the sum of the `number` column. The London housing
+notebook fills missing values with zero, which drags down any average taken afterwards. I would fix
+both, replace the hard-coded file paths with paths relative to the repository so every notebook runs
+anywhere, and add a short summary to each project with the questions and answers up front.

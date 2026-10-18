@@ -11,6 +11,46 @@ hook: "Every order updates stock by itself, and low shelves flag themselves for 
 fact: "Stored procedures and triggers"
 ---
 
-## Problem
+## The problem
 
-TODO
+An e-commerce company needed a database for its products, customers and orders that keeps stock correct
+without anyone updating it by hand. Placing an order has to reduce stock for every product in it, every
+stock change has to be recorded, low stock has to be easy to spot, and the business wants summaries of
+orders and of how much each customer spends.
+
+## How it works
+
+1. Five tables hold the data: `Products` (with stock and a reorder level), `Customers` (with a unique
+   email), `Orders`, `Order_Details` (one row per product per order, keyed on both) and
+   `Inventory_Logs`. Foreign keys tie them together, and a check constraint stops stock going below
+   zero.
+2. `PlaceMultipleOrder` takes a customer ID and two comma-separated lists, product IDs and quantities.
+   Inside a transaction it creates the order, works through the lists, looks up each price, applies a
+   quantity discount, writes the order lines, reduces stock, and finally records the order's total
+   amount and item count.
+3. The trigger `trg_log_inventory_change` fires after any update to a product's stock and writes the
+   difference to `Inventory_Logs`, labelled "Order Placement" or "Stock Replenishment".
+4. `ReplenishStock` adds stock back, and the same trigger logs it.
+5. Three views answer the reporting questions. `OrderSummary` shows each order with its customer and
+   totals, `LowStockProducts` lists everything below its reorder level, and `CustomerTiers` ranks
+   customers by total spend: Gold from 1,000, Silver from 500, Bronze below that.
+
+## Decisions worth explaining
+
+- **Logging in a trigger, not in the procedures.** Every stock change, whether from an order, a restock
+  or a manual update, passes through the same trigger, so the log cannot be forgotten.
+- **Prices frozen at order time.** `Order_Details` stores the price when the order was placed and the
+  discounted price, so a later price change does not rewrite old orders.
+- **One discount rule.** 2% from three items, 5% from five and 10% from ten, decided in the procedure so
+  every order gets the same rule.
+- **Views for reporting.** Each reporting question becomes a one-line query, and the logic behind it
+  lives in one place.
+- **A test script.** `Testing.sql` places an order, then checks the order, its lines, the new stock
+  levels, the log, each view, and a restock.
+
+## What I would change next
+
+The procedure starts a transaction but has no error handler, so if one line fails, for example because
+stock would go below zero, the lines before it are not rolled back. I would add a handler that rolls
+back and re-raises the error, and check stock before deducting it. Restocking is also manual today; a
+scheduled event could raise a restock request for everything in `LowStockProducts`.

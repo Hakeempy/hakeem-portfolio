@@ -15,6 +15,47 @@ coverAlt: "Scatter plot of five customer groups by annual income and spending sc
 focus: "50% 50%"
 ---
 
-## Problem
+## The problem
 
-TODO
+Six problems, each taken from a raw CSV file to a model that can be checked and used: heart disease,
+breast cancer, bank loan approval, insurance cost, customer segmentation and movie recommendations.
+Between them they cover the main kinds of machine learning work: classification, regression,
+clustering and recommendation.
+
+## How it works
+
+Every notebook follows the same path: load and inspect, clean, explore, prepare features, train,
+evaluate, then predict for a new example.
+
+1. **Heart disease.** 302 patients after removing duplicates. Six classifiers are compared on the same
+   split, and a random forest does best at 85% test accuracy. It is saved with Joblib.
+2. **Breast cancer.** 569 tumours with 30 measurements each. Logistic regression scores 92% on the test
+   set and sits behind a small function that labels a new sample benign or malignant.
+3. **Bank personal loan.** 5,000 customers, only 480 of whom took the loan. ZIP codes are mapped to
+   counties and then to four California regions, and the larger class is undersampled before training
+   logistic regression, which reaches 91% accuracy on a balanced test set.
+4. **Insurance cost.** 1,338 policies and four regression models. Gradient boosting scores best, with an
+   R² of 0.88, and powers the [insurance cost app](/projects/insurance-cost-app).
+5. **Customer segmentation.** 200 mall customers clustered with K-means on annual income and spending
+   score. The elbow method points to five clusters, each described for a marketing team.
+6. **Movie recommendations.** 4,803 films. Genres, keywords, tagline, cast and director become TF-IDF
+   vectors compared with cosine similarity, and `difflib` matches a misspelt title to a real one.
+
+## Decisions worth explaining
+
+- **Compare before choosing.** The heart disease and insurance notebooks try several kinds of model
+  instead of trusting the first. On insurance, support vector regression on unscaled features scored an
+  R² below zero, while the two tree ensembles scored 0.86 and 0.88.
+- **Balance the classes before trusting accuracy.** Fewer than one customer in ten took a loan, so a
+  model that always said no would be 90% accurate. Undersampling makes 91% mean something.
+- **Fix the data rather than drop it.** The negative years of experience all belonged to customers aged
+  23 to 29, so I treated the minus sign as a typo and kept the rows.
+- **Prepare only what needs it.** In the heart disease notebook, the linear and distance-based models get
+  one-hot encoding and scaling, while the tree models train on the raw features.
+
+## What I would change next
+
+Each model is judged on a single train and test split. I would use cross-validation, report precision
+and recall for the medical models, where a missed diagnosis costs far more than a false alarm, and put
+the preprocessing and the model into one scikit-learn pipeline so exactly the same steps run at
+prediction time.

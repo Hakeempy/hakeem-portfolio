@@ -15,6 +15,45 @@ coverAlt: "Bar chart of mean return on investment by movie genre from the TMDB d
 focus: "50% 50%"
 ---
 
-## Problem
+## The problem
 
-TODO
+Given a list of movie IDs, find out what the TMDB data says about them: which films earned, spent and
+made the most, whether franchise films do better than standalone ones, and which franchises and
+directors bring in the most. The API returns nested JSON with lists of genres, companies, cast and crew,
+so most of the work is turning that into a flat table you can trust.
+
+## How it works
+
+1. `fetch_movie_data` requests each movie with its credits through a `requests` session that retries on
+   rate limits and server errors, waiting longer each time. A failed ID is logged and skipped, which is
+   what happens to the ID 0 in the list. The raw results are saved to CSV.
+2. `clean_df` turns the stringified lists and dictionaries back into Python objects with
+   `ast.literal_eval`, then extracts what the analysis needs: genres, companies, countries and
+   languages as pipe-separated text, the collection name, the cast, the director, and the cast and crew
+   sizes.
+3. Zeros in budget, revenue and runtime become missing values, money is converted to millions, and
+   profit and ROI are derived. The cleaned table of 18 films is saved to its own CSV.
+4. The notebook calls functions that rank films by any metric, search by genre, cast and director,
+   compare franchise with standalone films, and group by franchise and by director. Five charts are
+   saved as PNG files.
+
+## Decisions worth explaining
+
+- **Raw and clean saved separately.** Keeping the raw API output means the cleaning can be changed and
+  rerun without calling the API again.
+- **Functions in a module, story in the notebook.** Everything reusable lives in `tmdb_functions.py`,
+  and the notebook only calls it and explains the results. That split is why the later
+  [PySpark version](/projects/tmdb-pyspark) could follow the same structure.
+- **Reading the results honestly.** Every film in the list earned more than a billion dollars, and only
+  two of the 18 are standalone. So when standalone films come out ahead on average revenue ($1.77bn
+  against $1.68bn) and ROI (9.6 against 8.0), that says more about the sample than about franchises.
+  The same narrow sample is why two of the searches in the brief, for Bruce Willis science fiction and
+  for Tarantino films with Uma Thurman, return nothing.
+
+## What I would change next
+
+Directors are grouped as one string, so "Joe Russo|Anthony Russo" counts as a single director, and
+"Chris Buck|Jennifer Lee" and "Jennifer Lee|Chris Buck" appear as two different ones. Splitting the
+names into separate rows before grouping fixes that, as the PySpark version does. I would also keep a
+single copy of `tmdb_functions.py`, since there are two today, and widen the list of films so the
+franchise comparison has enough standalone films to mean something.

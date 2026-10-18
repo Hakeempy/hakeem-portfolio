@@ -15,6 +15,39 @@ coverAlt: "Chart from the insurance cost prediction notebook"
 focus: "50% 50%"
 ---
 
-## Problem
+## The problem
 
-TODO
+A model in a notebook only helps whoever opens the notebook. The aim was to let anyone, without writing
+any Python, enter a few details about themselves and get an estimate of their health insurance cost
+from a trained model.
+
+## How it works
+
+1. The training data has 1,338 policies with age, sex, BMI, number of children, smoking status, region
+   and charges. The text columns are mapped to numbers, and 80% of the rows train four models: linear
+   regression, support vector regression, random forest and gradient boosting.
+2. On the remaining 20%, gradient boosting scores best, with an R² of 0.88 and a mean absolute error of
+   about 2,450, against 0.78 and about 4,190 for linear regression.
+3. Gradient boosting is retrained on all 1,338 rows and saved with Joblib.
+4. `ML_web_app.py` is a Streamlit app that loads the saved model and asks for age, sex, BMI, number of
+   children, smoking status and region. When you press Predict, it encodes the answers the way the
+   training data was encoded and shows the estimated cost.
+5. A Procfile and a setup script run Streamlit headless on the port the host provides, and a dev
+   container configuration starts the app in GitHub Codespaces.
+
+## Decisions worth explaining
+
+- **Choose on held-out data, then train on everything.** The comparison uses a test split, but the
+  saved model is refit on every row, so the app does not lose a fifth of the data.
+- **Gradient boosting over the simpler model.** Both tree ensembles cut the average error by about 40%
+  compared with linear regression, and gradient boosting edged out the random forest.
+- **Streamlit instead of a desktop window.** The notebook ends with a Tkinter form that only works on
+  the computer running it. Streamlit turned the same model into a web page with one short Python file.
+
+## What I would change next
+
+The region mapping has a bug: the branch meant for northwest checks for southwest a second time, so
+northwest is sent as 4, the code for northeast. It is a one-line fix. The age slider also goes up to 100
+while the oldest person in the training data was 64, and the children slider stops at 4 while the data
+goes up to 5. I would match both to the data, and save the encoding together with the model in one
+scikit-learn pipeline, so the app and the training can never drift apart again.

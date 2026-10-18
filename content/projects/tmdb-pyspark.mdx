@@ -15,6 +15,47 @@ coverAlt: "Bar chart of mean return on investment by movie genre from the TMDB d
 focus: "50% 50%"
 ---
 
-## Problem
+## The problem
 
-TODO
+Which films earn the most, which return the most for each dollar spent, whether franchise films do
+better than standalone ones, and which directors bring in the most revenue. I first answered these
+questions with pandas ([TMDB Movie Data Analysis](/projects/tmdb-pandas)). This version rebuilds the
+same analysis on PySpark, so the same code would hold up on far more movies than fit comfortably on a
+laptop.
+
+## How it works
+
+1. `fetch_movie_data` calls the TMDB API for each movie, with its credits, and turns each response into
+   a Spark `Row`. The list has 19 IDs. One of them is 0, which does not exist, so it is logged and
+   skipped.
+2. `build_schema` declares the full structure up front: arrays of structs for genres, companies,
+   countries and languages, a map for the collection, and nested cast and crew lists.
+3. `clean_movie_data` flattens it with Spark's higher-order functions. `transform` pulls the names out of
+   each array and joins them with pipes, and `filter` keeps only the crew members whose job is
+   Director. Budget and revenue become millions, and profit and ROI are derived from them.
+4. Analysis functions rank films by any metric with an optional minimum, search by genre, cast and
+   director, compare franchise with standalone films, and total up each franchise and director.
+5. Small results go to pandas for five Matplotlib charts, among them revenue against budget, ROI by
+   genre and yearly box office.
+
+## Decisions worth explaining
+
+- **Schema first.** The API returns nested JSON whose shape varies from film to film. Declaring the
+  schema myself avoided inference surprises, such as numbers read as strings, and made every later
+  column predictable.
+- **Zero means unknown.** TMDB uses 0 for a missing budget, revenue or runtime. Left alone, those zeros
+  would drag averages down and make ROI divide by zero, so they become nulls before any metric is
+  computed.
+- **Directors split before grouping.** A film with two directors arrives as one string. The director
+  analysis splits and explodes it, so each person is credited on their own instead of "Joe
+  Russo|Anthony Russo" counting as one director.
+- **Cache once, read many times.** The cleaned DataFrame is cached, because every ranking, search and
+  chart reads it again.
+
+## What I would change next
+
+The retry adapter is mounted on a misspelled scheme, `htttps://`, so the retries for rate limits and
+server errors never apply to the real HTTPS calls. That is a one-line fix. I would also replace the
+hard-coded rewrites that put genre and country lists into a standard order with a sort, so new
+combinations are handled too, and save the cleaned data as Parquet so the analysis can run again without
+calling the API.
