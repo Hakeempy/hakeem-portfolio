@@ -228,3 +228,19 @@ body {
     transform: none;
   }
 }
+
+/* The toolkit's gold marker: a record travelling the stages, ingest to serve, again and again. */
+@media (prefers-reduced-motion: no-preference) {
+  .toolkit-runner {
+    animation: toolkit-run 7s var(--ease-in-out) infinite;
+  }
+}
+
+@keyframes toolkit-run {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
