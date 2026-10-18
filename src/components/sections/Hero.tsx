@@ -1,55 +1,16 @@
-"use client";
-
-import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { site } from "@/data/site";
+import { DataJourney } from "@/components/three/DataJourney";
 
-// The two Grafana dashboards from Hakeem's own pipelines. The large print crossfades between them
-// like light shifting in a room.
-const screens = [
-  {
-    src: "/images/work/heartbeat-grafana.png",
-    alt: "Grafana dashboard from the heart-rate pipeline: 34,978 records, minimum 50 and maximum 120 bpm",
-    focus: "8% 40%",
-    light: false,
-  },
-  {
-    src: "/images/work/flight-grafana.png",
-    alt: "Grafana dashboard from the flight price pipeline: average fare by airline",
-    focus: "18% 88%",
-    light: false,
-  },
-];
-
-const HOLD_MS = 5600;
-
+/**
+ * The hero: the raw-to-gold particle pipeline fills the first screen, with the name, the
+ * headline and one action set over it. No screenshots, no empty quadrants.
+ */
 export function Hero() {
-  const [index, setIndex] = useState(0);
-  const reduce = useReducedMotion();
-
-  useEffect(() => {
-    if (reduce) return;
-    let timer: number | undefined;
-    const start = () => {
-      stop();
-      timer = window.setInterval(() => setIndex((i) => (i + 1) % screens.length), HOLD_MS);
-    };
-    const stop = () => window.clearInterval(timer);
-    const onVisibility = () => (document.hidden ? stop() : start());
-    start();
-    document.addEventListener("visibilitychange", onVisibility);
-    return () => {
-      stop();
-      document.removeEventListener("visibilitychange", onVisibility);
-    };
-  }, [reduce]);
-
-  const screen = screens[index];
-
   return (
     <header className="relative h-svh min-h-[640px] overflow-hidden">
+      <DataJourney className="absolute inset-0" />
+
       <nav
         aria-label="Main"
         className="absolute inset-x-0 top-0 z-20 flex items-start justify-between px-margin pt-margin text-small"
@@ -81,68 +42,26 @@ export function Hero() {
         </a>
       </nav>
 
-      {/* The large print: 4:5, the brightest thing in the room */}
-      <div
-        data-rise
-        className="absolute top-[11svh] right-margin aspect-[4/5] h-[52svh] max-w-[calc(100vw-2*var(--margin))] lg:top-[8%] lg:right-auto lg:left-1/2 lg:h-[74svh] lg:w-auto lg:max-w-none"
-      >
-        <div className="relative h-full w-full overflow-hidden bg-surface">
-          <AnimatePresence initial={false}>
-            <motion.div
-              key={screen.src}
-              className="absolute inset-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.6, ease: [0.33, 1, 0.68, 1] }}
-            >
-              <Image
-                src={screen.src}
-                alt={screen.alt}
-                fill
-                priority={index === 0}
-                sizes="(min-width: 1024px) 45vw, 78vw"
-                className={`object-cover ${screen.light ? "lit-light" : ""}`}
-                style={{ objectPosition: screen.focus }}
-              />
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
-
-      {/* The small print: 1:1, dimmed so the large one stays brightest */}
-      <div
-        data-rise
-        style={{ "--i": 2 } as React.CSSProperties}
-        className="absolute top-[60svh] left-margin w-[18svh] lg:top-[52%] lg:left-[8.33%] lg:w-[12vw]"
-      >
-        <div className="relative aspect-square overflow-hidden">
-          <Image
-            src="/images/work/music-airflow.png"
-            alt="Airflow grid of task runs, green for success and red for failure, from the music streaming pipeline"
-            fill
-            sizes="(min-width: 1024px) 12vw, 30vw"
-            className="object-cover invert hue-rotate-180 brightness-[0.7]"
-            style={{ objectPosition: "17% 63%" }}
-          />
-        </div>
-      </div>
-
-      <div className="absolute inset-x-0 bottom-0 z-10 grid gap-4 px-margin pb-margin lg:grid-cols-12 lg:items-end">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 grid gap-6 px-margin pb-[clamp(24px,4vw,56px)] lg:grid-cols-12 lg:items-end">
         <h1
           data-rise
           style={{ "--i": 1 } as React.CSSProperties}
-          className="display max-w-[22ch] text-head lg:col-span-6"
+          className="display max-w-[16ch] text-[clamp(2.5rem,1rem+5.4vw,6.5rem)] leading-[0.98] font-medium tracking-[-0.04em] lg:col-span-8"
         >
           I build the pipelines your data runs&nbsp;on.
         </h1>
-        <p
-          data-rise
-          style={{ "--i": 3 } as React.CSSProperties}
-          className="max-w-[26ch] text-small leading-[1.45] text-muted lg:col-span-3 lg:col-start-10"
-        >
-          Data engineer in Accra. Analyst first, teacher still. Real-time and batch pipelines on AWS.
-        </p>
+        <div data-rise style={{ "--i": 3 } as React.CSSProperties} className="pointer-events-auto lg:col-span-3 lg:col-start-10">
+          <p className="max-w-[30ch] text-muted">
+            Data engineer in Accra. Analyst first, teacher still. From a raw record to a trusted
+            number, on AWS.
+          </p>
+          <a href="#work" className="link mt-5 inline-block text-ink">
+            See the pipelines
+          </a>
+          <p className="mt-6 text-small text-muted">
+            Click the stream to send a surge of records.
+          </p>
+        </div>
       </div>
     </header>
   );
