@@ -2,7 +2,9 @@
 
 Personal portfolio of Hakeem Wikireh: data engineer, former data analyst, and data analytics instructor.
 
-Built with Next.js (App Router), TypeScript, Tailwind CSS v4 and Motion. Project case studies are MDX files.
+Live at **https://hakeem-portfolio-azure.vercel.app**.
+
+Built with Next.js (App Router), TypeScript, Tailwind CSS v4, Motion and Three.js. Project case studies are MDX files.
 
 ## Getting started
 
@@ -50,3 +52,12 @@ src/
 
 2. Put images in `public/images/projects/<slug>/`.
 3. The project shows up on `/projects` and gets its own page at `/projects/<slug>`. Set `featured: true` to also list it on the home page.
+
+## Deployment
+
+The site is hosted on Vercel and connected to this repository: every push to `main` deploys to
+production, and every other branch gets its own preview URL. To deploy by hand from this folder:
+
+```bash
+npx vercel deploy --prod
+```
