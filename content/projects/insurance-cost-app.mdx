@@ -46,8 +46,9 @@ from a trained model.
 
 ## What I would change next
 
-The region mapping has a bug: the branch meant for northwest checks for southwest a second time, so
-northwest is sent as 4, the code for northeast. It is a one-line fix. The age slider also goes up to 100
-while the oldest person in the training data was 64, and the children slider stops at 4 while the data
-goes up to 5. I would match both to the data, and save the encoding together with the model in one
-scikit-learn pipeline, so the app and the training can never drift apart again.
+Reading the code for this write-up turned up a bug: the branch meant for northwest checked for southwest
+a second time, so northwest was sent as the code for northeast. The sliders also allowed ages up to 100
+and at most 4 children, outside the training data (ages 18 to 64, up to 5 children). Both are now fixed
+in [the app](https://github.com/Hakeempy/ML-WEB-APP/commit/4e3443c). Next I would save the encoding
+together with the model in one scikit-learn pipeline, so the app and the training can never drift apart
+again.

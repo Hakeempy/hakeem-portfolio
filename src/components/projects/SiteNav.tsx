@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { site } from "@/data/site";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 /** The plain bar for pages other than home: wordmark, three links, one action. */
 export function SiteNav({ current }: { current?: "projects" }) {
@@ -35,9 +36,12 @@ export function SiteNav({ current }: { current?: "projects" }) {
           </li>
         </ul>
       </div>
-      <Link href="/#contact" className="button">
-        Work with me
-      </Link>
+      <div className="flex items-center gap-5 md:gap-7">
+        <ThemeToggle />
+        <Link href="/#contact" className="button">
+          Work with me
+        </Link>
+      </div>
     </nav>
   );
 }

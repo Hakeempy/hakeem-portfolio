@@ -12,6 +12,7 @@
   --muted: #a39d96;
   --accent: #c9a45a;
   --accent-ink: #0c0a08;
+  --accent-hover: #d8b56c;
   --field: #ece7df;
 
   /* Five type steps, no more */
@@ -34,6 +35,37 @@
   --t-reveal: 800ms;
 
   color-scheme: dark;
+}
+
+/*
+ * The light room: stone white, near-black ink, and a deeper gold so accents keep their
+ * contrast. The project scenes and the footer photograph stay dark in both themes: they are
+ * screens and a picture hung on the wall, not the wall itself.
+ */
+:root[data-theme="light"] {
+  --bg: #f3f2ef;
+  --surface: #e8e6e1;
+  --surface-2: #dcd9d3;
+  --ink: #161411;
+  --muted: #5f5a54;
+  --accent: #8e6c2c;
+  --accent-ink: #ffffff;
+  --accent-hover: #7a5c24;
+  --field: #ffffff;
+  color-scheme: light;
+}
+
+/* Re-asserts the dark tokens inside something that must stay dark, whatever the theme. */
+.theme-dark {
+  --bg: #0c0a08;
+  --surface: #181512;
+  --surface-2: #231f1b;
+  --ink: #f4f4f3;
+  --muted: #a39d96;
+  --accent: #c9a45a;
+  --accent-ink: #0c0a08;
+  --accent-hover: #d8b56c;
+  color: var(--ink);
 }
 
 @theme inline {
@@ -114,7 +146,7 @@ body {
 }
 
 .button:hover {
-  background: #d8b56c;
+  background: var(--accent-hover);
 }
 
 .button:active {

@@ -4,6 +4,7 @@ import { LivePipeline } from "@/components/sections/LivePipeline";
 import { WorkList } from "@/components/sections/WorkList";
 import { Path } from "@/components/sections/Path";
 import { Teaching } from "@/components/sections/Teaching";
+import { Certification } from "@/components/sections/Certification";
 import { Contact } from "@/components/sections/Contact";
 import { Footer } from "@/components/sections/Footer";
 import { getFeaturedProjects, getOtherProjects } from "@/lib/projects";
@@ -34,6 +35,7 @@ export default function Home() {
         <LivePipeline />
         <WorkList projects={others} />
         <Path />
+        <Certification />
         <Teaching />
         <Contact />
       </main>

@@ -7,6 +7,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useReducedMotion } from "motion/react";
+import { useTheme } from "@/components/theme/ThemeToggle";
 import * as THREE from "three";
 
 /*
@@ -19,12 +20,13 @@ import * as THREE from "three";
  * Everything is deterministic: positions come from a seeded generator, never Math.random.
  */
 
+// The line dips through the gates and rises to the gold block, like value climbing as data is refined.
 const PATH = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(-10, 2, -5),
-  new THREE.Vector3(-5.5, 1.1, -2),
-  new THREE.Vector3(-1.2, 0.6, 0),
-  new THREE.Vector3(2.8, 0.2, 0.6),
-  new THREE.Vector3(6.6, 0.4, -0.4),
+  new THREE.Vector3(-10, 1.6, -5),
+  new THREE.Vector3(-5.5, 0.6, -2),
+  new THREE.Vector3(-1.2, 0.3, 0),
+  new THREE.Vector3(2.8, 0.9, 0.6),
+  new THREE.Vector3(6.6, 2.1, -0.4),
 ]);
 
 // The gold block: a regular lattice, so the served records read as an ordered table.
@@ -46,9 +48,24 @@ function stageAt(t: number) {
   return 3;
 }
 
-const RAW = new THREE.Color("#8f8a84");
-const CLEAN = new THREE.Color("#f4f4f3");
-const GOLD = new THREE.Color("#c9a45a");
+// Colours for each theme: raw records, clean records, the gold layer, unlit gates, and the room.
+const PALETTES = {
+  dark: {
+    raw: new THREE.Color("#8f8a84"),
+    clean: new THREE.Color("#f4f4f3"),
+    gold: new THREE.Color("#c9a45a"),
+    gate: new THREE.Color("#4a433c"),
+    room: new THREE.Color("#0c0a08"),
+  },
+  light: {
+    raw: new THREE.Color("#aaa49c"),
+    clean: new THREE.Color("#1d1a16"),
+    gold: new THREE.Color("#a07b34"),
+    gate: new THREE.Color("#c4bfb6"),
+    room: new THREE.Color("#f3f2ef"),
+  },
+};
+type Palette = (typeof PALETTES)["dark"];
 const LANES = 8;
 const REACH = 1.1; // how far the cursor parts the stream, in world units
 
@@ -75,7 +92,17 @@ const smooth = (a: number, b: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 
-function Records({ count, still, io }: { count: number; still: boolean; io: React.RefObject<Interaction> }) {
+function Records({
+  count,
+  still,
+  io,
+  palette,
+}: {
+  count: number;
+  still: boolean;
+  io: React.RefObject<Interaction>;
+  palette: Palette;
+}) {
   const points = useRef<THREE.Points>(null);
   const { camera, pointer } = useThree();
 
@@ -167,8 +194,13 @@ function Records({ count, still, io }: { count: number; still: boolean; io: Reac
       s.p.y = THREE.MathUtils.lerp(s.p.y, s.end.y + d.slot.y, settle);
       s.p.z = THREE.MathUtils.lerp(s.p.z, s.end.z + d.slot.z, settle);
 
-      if (fallen) s.color.copy(RAW).multiplyScalar(0.55);
-      else s.color.copy(RAW).lerp(CLEAN, smooth(GATES[1].t - 0.05, GATES[1].t + 0.05, t)).lerp(GOLD, settle);
+      // Rejected records fade toward the room as they fall away.
+      if (fallen) s.color.copy(palette.raw).lerp(palette.room, 0.5);
+      else
+        s.color
+          .copy(palette.raw)
+          .lerp(palette.clean, smooth(GATES[1].t - 0.05, GATES[1].t + 0.05, t))
+          .lerp(palette.gold, settle);
 
       // The cursor parts the stream, and the records it touches brighten.
       if (probe) {
@@ -178,7 +210,7 @@ function Records({ count, still, io }: { count: number; still: boolean; io: Reac
           const k = 1 - dist / REACH;
           s.away.subVectors(s.p, s.closest).normalize().multiplyScalar(k * k * 0.7);
           s.p.add(s.away);
-          s.color.lerp(CLEAN, k * 0.6);
+          s.color.lerp(palette.clean, k * 0.6);
         }
         if (dist < nearestD && !fallen) {
           nearestD = dist;
@@ -216,7 +248,7 @@ function Records({ count, still, io }: { count: number; still: boolean; io: Reac
   useEffect(() => {
     place(scratch.clock, false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count]);
+  }, [count, palette]);
 
   useFrame((_, delta) => {
     const io_ = io.current;
@@ -240,7 +272,7 @@ function Records({ count, still, io }: { count: number; still: boolean; io: Reac
 }
 
 /** The served table: a standing lattice of gold records the stream settles into, turning slowly. */
-function GoldBlock({ still, io }: { still: boolean; io: React.RefObject<Interaction> }) {
+function GoldBlock({ still, io, palette }: { still: boolean; io: React.RefObject<Interaction>; palette: Palette }) {
   const group = useRef<THREE.Group>(null);
   const positions = useMemo(() => {
     const n = 9;
@@ -271,17 +303,17 @@ function GoldBlock({ still, io }: { still: boolean; io: React.RefObject<Interact
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[positions, 3]} />
         </bufferGeometry>
-        <pointsMaterial size={0.075} color="#c9a45a" sizeAttenuation />
+        <pointsMaterial size={0.075} color={palette.gold} sizeAttenuation />
       </points>
     </group>
   );
 }
 
 /** The first three stage gates: square frames standing across the stream. They light when hovered. */
-function Gates({ io }: { io: React.RefObject<Interaction> }) {
+function Gates({ io, palette }: { io: React.RefObject<Interaction>; palette: Palette }) {
   const materials = useRef<(THREE.MeshBasicMaterial | null)[]>([]);
-  const dim = useMemo(() => new THREE.Color("#4a433c"), []);
-  const lit = useMemo(() => new THREE.Color("#c9a45a"), []);
+  const dim = palette.gate;
+  const lit = palette.gold;
   useFrame(() => {
     materials.current.forEach((m, k) => {
       if (!m) return;
@@ -296,7 +328,7 @@ function Gates({ io }: { io: React.RefObject<Interaction> }) {
         const position = PATH.getPointAt(gate.t);
         const tangent = PATH.getTangentAt(gate.t);
         const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), tangent);
-        const size = gate.t < 0.3 ? 4.6 : gate.t < 0.6 ? 3.4 : 2.2;
+        const size = gate.t < 0.3 ? 4 : gate.t < 0.6 ? 3.2 : 2.2;
         const bar = 0.05;
         return (
           <group key={gate.label} position={position} quaternion={quaternion}>
@@ -312,7 +344,7 @@ function Gates({ io }: { io: React.RefObject<Interaction> }) {
                   ref={(m) => {
                     materials.current[g * 4 + i] = m;
                   }}
-                  color="#4a433c"
+                  color={palette.gate}
                 />
               </mesh>
             ))}
@@ -343,17 +375,19 @@ function Labels({ refs }: { refs: React.RefObject<(HTMLElement | null)[]> }) {
 }
 
 // The points that must stay in frame: the corners of the first (largest) gate and of the gold block.
+// Each carries the lowest screen height it may reach: the gold block sits above the text column
+// on the right, so it is held higher than the gates on the left.
 const FRAME_POINTS = (() => {
-  const out: THREE.Vector3[] = [];
+  const out: { p: THREE.Vector3; minY: number }[] = [];
   const gate = GATES[0];
   const at = PATH.getPointAt(gate.t);
   const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), PATH.getTangentAt(gate.t));
-  const half = 4.6 / 2;
+  const half = 4 / 2;
   for (const [x, y] of [[-half, -half], [-half, half], [half, -half], [half, half]])
-    out.push(new THREE.Vector3(x, y, 0).applyQuaternion(q).add(at));
+    out.push({ p: new THREE.Vector3(x, y, 0).applyQuaternion(q).add(at), minY: -0.16 });
   const end = PATH.getPointAt(0.96);
   for (const x of [-1, 1]) for (const y of [-1, 1]) for (const z of [-1, 1])
-    out.push(new THREE.Vector3(x, y, z).multiplyScalar(1.1).add(end));
+    out.push({ p: new THREE.Vector3(x, y, z).multiplyScalar(1.1).add(end), minY: 0.12 });
   return out;
 })();
 
@@ -364,36 +398,45 @@ const LOOK_AT = new THREE.Vector3(-0.2, 0.4, 0);
  * The nearest camera distance at which every frame point fits on screen, inside the band above
  * the headline. Found by bisection for the window's shape, so no stage is ever cut off.
  */
-// On tall screens the camera looks a little lower, which lifts the stream toward the middle.
-const lookY = (aspect: number) => LOOK_AT.y - (aspect < 1 ? (1 - aspect) * 2.4 : 0);
-
-function fitDistance(aspect: number) {
+/**
+ * The framing for a window shape: where the camera aims (its look height) and how far back it
+ * stands. For each look height, bisection finds the nearest distance at which every frame point
+ * fits on screen inside its band; the look height that allows the nearest camera wins. So no
+ * stage is cut off, the gold block clears the text column, and the stream stays as large as it can.
+ */
+function fitFraming(aspect: number) {
   const cam = new THREE.PerspectiveCamera(38, aspect, 0.1, 200);
   const v = new THREE.Vector3();
-  const fits = (z: number) => {
+  const fits = (z: number, lookY: number) => {
     cam.position.set(CAMERA_AT.x, CAMERA_AT.y, z);
-    cam.lookAt(LOOK_AT.x, lookY(aspect), LOOK_AT.z);
+    cam.lookAt(LOOK_AT.x, lookY, LOOK_AT.z);
     cam.updateMatrixWorld();
-    return FRAME_POINTS.every((p) => {
+    return FRAME_POINTS.every(({ p, minY }) => {
       v.copy(p).project(cam);
-      return Math.abs(v.x) <= 0.94 && v.y <= 0.72 && v.y >= -0.3;
+      // Above the headline and the text column, below the navigation.
+      return Math.abs(v.x) <= 0.94 && v.y <= 0.76 && v.y >= minY;
     });
   };
-  let lo = 6;
-  let hi = 60;
-  for (let i = 0; i < 24; i++) {
-    const mid = (lo + hi) / 2;
-    if (fits(mid)) hi = mid;
-    else lo = mid;
+  let best = { z: 60, lookY: LOOK_AT.y };
+  for (let lookY = -3; lookY <= 1.5; lookY += 0.1) {
+    let lo = 6;
+    let hi = 60;
+    if (!fits(hi, lookY)) continue;
+    for (let i = 0; i < 22; i++) {
+      const mid = (lo + hi) / 2;
+      if (fits(mid, lookY)) hi = mid;
+      else lo = mid;
+    }
+    if (hi < best.z) best = { z: hi, lookY };
   }
-  return hi;
+  return best;
 }
 
 /** The camera drifts toward the pointer and travels a little way down the line as the page scrolls. */
 function Rig({ still }: { still: boolean }) {
   const { camera, pointer, size, scene } = useThree();
   const scroll = useRef(0);
-  const distance = useMemo(() => fitDistance(size.width / size.height), [size.width, size.height]);
+  const framing = useMemo(() => fitFraming(size.width / size.height), [size.width, size.height]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -410,8 +453,8 @@ function Rig({ still }: { still: boolean }) {
     const py = still ? 0 : pointer.y * 0.25;
     camera.position.x += (CAMERA_AT.x + s * 4 + px - camera.position.x) * 0.05;
     camera.position.y += (CAMERA_AT.y - s * 0.8 + py - camera.position.y) * 0.05;
-    camera.position.z += (distance - s * 3 - camera.position.z) * 0.05;
-    camera.lookAt(LOOK_AT.x + s * 3, lookY(size.width / size.height), LOOK_AT.z);
+    camera.position.z += (framing.z - s * 3 - camera.position.z) * 0.05;
+    camera.lookAt(LOOK_AT.x + s * 3, framing.lookY, LOOK_AT.z);
     // Depth fog that travels with the camera: the near stream is crisp, the far end recedes.
     if (scene.fog instanceof THREE.Fog) {
       scene.fog.near = camera.position.z - 2;
@@ -423,6 +466,7 @@ function Rig({ still }: { still: boolean }) {
 
 export function DataJourney({ className = "" }: { className?: string }) {
   const still = useReducedMotion() ?? false;
+  const palette = PALETTES[useTheme()];
   // Fewer records on small screens. Read once on the client; the canvas never renders on the server.
   const [count] = useState(() => (typeof window !== "undefined" && window.innerWidth < 768 ? 1600 : 4200));
   const [visible, setVisible] = useState(true);
@@ -458,10 +502,10 @@ export function DataJourney({ className = "" }: { className?: string }) {
         frameloop={still || !visible ? "demand" : "always"}
         gl={{ antialias: true, alpha: true }}
       >
-        <fog attach="fog" args={["#0c0a08", 10, 26]} />
-        <Records count={count} still={still} io={io} />
-        <GoldBlock still={still} io={io} />
-        <Gates io={io} />
+        <fog attach="fog" args={[palette.room, 10, 26]} />
+        <Records count={count} still={still} io={io} palette={palette} />
+        <GoldBlock still={still} io={io} palette={palette} />
+        <Gates io={io} palette={palette} />
         <Rig still={still} />
         <Labels refs={labels} />
       </Canvas>

@@ -5,7 +5,7 @@ import { Reveal } from "@/components/motion/Reveal";
 
 export function Footer() {
   return (
-    <footer className="relative h-[88svh] overflow-hidden md:h-svh">
+    <footer className="theme-dark relative h-[88svh] overflow-hidden md:h-svh">
       <Image
         src="/images/found/independence-arch-accra-ghana1.jpg"
         alt="Independence Arch in Accra, its black star above the words Freedom and Justice"
@@ -18,10 +18,7 @@ export function Footer() {
       <div className="absolute inset-x-0 top-0 flex flex-col gap-6 px-margin pt-8 text-base sm:flex-row sm:justify-between">
         <ul className="space-y-1">
           <li>
-            <a className="link" href="#work">Work</a>
-          </li>
-          <li>
-            <Link className="link" href="/projects">All projects</Link>
+            <Link className="link" href="/projects">Projects</Link>
           </li>
           <li>
             <a className="link" href="#path">About</a>

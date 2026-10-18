@@ -52,7 +52,8 @@ export function StoryScene({
       viewBox="0 0 600 400"
       role="img"
       aria-label={label}
-      className="block h-auto w-full bg-surface"
+      className="block h-auto w-full"
+      style={{ background: C.ground }}
       fontFamily="inherit"
     >
       {children(reduce)}

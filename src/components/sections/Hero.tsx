@@ -1,6 +1,9 @@
+import Image from "next/image";
 import Link from "next/link";
 import { site } from "@/data/site";
+import { certifications } from "@/data/certifications";
 import { DataJourney } from "@/components/three/DataJourney";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 /**
  * The hero: the raw-to-gold particle pipeline fills the first screen, with the name, the
@@ -21,9 +24,9 @@ export function Hero() {
           </Link>
           <ul className="hidden gap-6 text-muted md:flex">
             <li>
-              <a className="link hover:text-ink" href="#work">
-                Work
-              </a>
+              <Link className="link hover:text-ink" href="/projects">
+                Projects
+              </Link>
             </li>
             <li>
               <a className="link hover:text-ink" href="#path">
@@ -37,9 +40,12 @@ export function Hero() {
             </li>
           </ul>
         </div>
-        <a href="#contact" className="button">
-          Work with me
-        </a>
+        <div className="flex items-center gap-5 md:gap-7">
+          <ThemeToggle />
+          <a href="#contact" className="button">
+            Work with me
+          </a>
+        </div>
       </nav>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 grid gap-6 px-margin pb-[clamp(24px,4vw,56px)] lg:grid-cols-12 lg:items-end">
@@ -52,9 +58,19 @@ export function Hero() {
         </h1>
         <div data-rise style={{ "--i": 3 } as React.CSSProperties} className="pointer-events-auto lg:col-span-3 lg:col-start-10">
           <p className="max-w-[30ch] text-muted">
-            Data engineer in Accra. Analyst first, teacher still. From a raw record to a trusted
-            number, on AWS.
+            Data engineer. Analyst first, and still a data analytics course instructor and
+            consultant. From a raw record to a trusted number, on AWS.
           </p>
+          <a href="#certification" className="group mt-5 flex items-center gap-3">
+            <Image
+              src={certifications[0].badge.src}
+              alt=""
+              width={40}
+              height={40}
+              className="size-10 shrink-0 transition-transform duration-200 ease-out group-hover:scale-105"
+            />
+            <span className="text-small text-ink">{certifications[0].name}</span>
+          </a>
           <a href="#work" className="link mt-5 inline-block text-ink">
             See the pipelines
           </a>

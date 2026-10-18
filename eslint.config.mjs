@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Agent worktrees and design-inspection output live inside the project folder.
+    ".claude/**",
+    ".taste-skill/**",
   ]),
 ]);
 
