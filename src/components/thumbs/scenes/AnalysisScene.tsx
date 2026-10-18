@@ -1,12 +1,13 @@
 "use client";
 
-import { C, Row, Stage, StoryScene, Token, rowPath, showBetween } from "../StoryScene";
+import { Row, Stage, StoryScene, Token, rowPath, showBetween, useC } from "../StoryScene";
 
 const DUR = 6;
 const CELLS = [70, 230, 390];
 
 /** Data analysis notebooks: three cells run in turn, and each draws its chart when it runs. */
 export function AnalysisScene() {
+  const C = useC();
   const show = (i: number) => showBetween(0.08 + i * 0.25, 0.92);
   return (
     <StoryScene label="Animation: three notebook cells run one after another, each drawing a chart, with Python, SQL and Jupyter">
@@ -15,7 +16,7 @@ export function AnalysisScene() {
           <Stage caption="notebooks on public datasets" />
           {CELLS.map((x, i) => (
             <g key={x}>
-              <rect x={x} y="80" width="140" height="112" fill="#2b2621" />
+              <rect x={x} y="80" width="140" height="112" fill={C.panel} />
               {/* The run marker */}
               <rect x={x} y="80" width="140" height="8" fill={C.line} />
               <rect x={x} y="80" width="140" height="8" fill={C.gold} opacity={still ? 1 : 0}>

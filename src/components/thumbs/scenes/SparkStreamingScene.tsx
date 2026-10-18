@@ -1,6 +1,6 @@
 "use client";
 
-import { C, Row, Stage, StoryScene, Token, rowPath, showBetween } from "../StoryScene";
+import { Row, Stage, StoryScene, Token, rowPath, showBetween, useC } from "../StoryScene";
 
 const DUR = 6;
 const R = 42;
@@ -8,6 +8,7 @@ const CIRC = 2 * Math.PI * R;
 
 /** Spark streaming: a 15-second timer fills, and each time a new CSV batch appears on the shelf. */
 export function SparkStreamingScene() {
+  const C = useC();
   return (
     <StoryScene label="Animation: a timer fills every 15 seconds as new CSV batches arrive and Spark Structured Streaming writes them to PostgreSQL">
       {(still) => (
@@ -34,8 +35,8 @@ export function SparkStreamingScene() {
           {/* The batches, one more each turn of the timer */}
           {[0, 1, 2, 3].map((i) => (
             <g key={i} opacity={still ? 1 : 0}>
-              <rect x={210 + i * 86} y="96" width="62" height="80" fill={C.ink} />
-              <text x={222 + i * 86} y="141" fontSize="13" fontWeight="500" fill={C.goldInk}>
+              <rect x={210 + i * 86} y="96" width="62" height="80" fill={C.paper} />
+              <text x={222 + i * 86} y="141" fontSize="13" fontWeight="500" fill={C.paperInk}>
                 CSV
               </text>
               {!still && <animate dur={`${DUR}s`} {...showBetween(0.05 + i * 0.22, 0.94)} />}

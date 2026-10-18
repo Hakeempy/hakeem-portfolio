@@ -1,18 +1,19 @@
 "use client";
 
-import { Bars, Row, Stage, StoryScene, Token, rowPath } from "../StoryScene";
+import { Bars, Row, Stage, StoryScene, Token, rowPath, useC } from "../StoryScene";
 
 const DUR = 5;
 const LEVELS = [0.45, 0.7, 0.55, 0.9, 0.6, 0.4, 0.75, 0.5, 0.85, 0.65, 0.35, 1, 0.55, 0.7, 0.45, 0.8, 0.5, 0.6];
 
 /** Music streaming: an equalizer of listening activity; the top genre of the day is in gold. */
 export function MusicScene() {
+  const C = useC();
   return (
     <StoryScene label="Animation: an equalizer of streams by genre feeds files through Airflow and a Spark job into DynamoDB">
       {(still) => (
         <>
           <Stage caption="streams by genre" />
-          <Bars x={62} base={196} values={LEVELS} width={20} gap={6.5} max={100} highlight={11} dur={2.4} still={still} ink="#4a433c" />
+          <Bars x={62} base={196} values={LEVELS} width={20} gap={6.5} max={100} highlight={11} dur={2.4} still={still} ink={C.line} />
           <Row
             steps={[
               { name: "S3", role: "incoming files" },

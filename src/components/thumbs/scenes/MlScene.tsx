@@ -1,6 +1,6 @@
 "use client";
 
-import { C, Row, Stage, StoryScene, Token, rowPath, showBetween } from "../StoryScene";
+import { Row, Stage, StoryScene, Token, rowPath, showBetween, useC } from "../StoryScene";
 
 const DUR = 6;
 // Five cluster centres inside the stage, and fixed offsets for the points around them (no randomness).
@@ -19,6 +19,7 @@ const SPREAD = (i: number) => [60 + ((i * 97) % 480), 80 + ((i * 53) % 110)];
 
 /** Machine learning: scattered customers settle into five k-means segments, centres in gold. */
 export function MlScene() {
+  const C = useC();
   const points = CENTRES.flatMap(([cx, cy], c) => OFFSETS.map(([dx, dy], k) => ({ c, x: cx + dx, y: cy + dy, i: c * 6 + k })));
   return (
     <StoryScene label="Animation: scattered points settle into five customer segments with their centres in gold, built with pandas and scikit-learn in Jupyter">

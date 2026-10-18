@@ -1,6 +1,6 @@
 "use client";
 
-import { C, Row, Stage, StoryScene, Token, rowPath } from "../../StoryScene";
+import { Row, Stage, StoryScene, Token, rowPath, useC } from "../../StoryScene";
 
 const DUR = 6;
 const LESSON = "M70 170 L120 150 L170 158 L220 120 L270 104";
@@ -11,6 +11,7 @@ const LENGTH = 230;
  * room light up as it lands.
  */
 export function InstructorScene() {
+  const C = useC();
   const seats = Array.from({ length: 24 }, (_, i) => ({ x: 350 + (i % 6) * 34, y: 92 + Math.floor(i / 6) * 28, i }));
   return (
     <StoryScene label="Animation: a chart is drawn on a board while learners in a room light up one by one, from Excel and SQL to Python">
@@ -18,7 +19,7 @@ export function InstructorScene() {
         <>
           <Stage caption="100+ students and professionals" />
           {/* The board */}
-          <rect x="50" y="78" width="250" height="116" fill="#2b2621" />
+          <rect x="50" y="78" width="250" height="116" fill={C.panel} />
           <path
             d={LESSON}
             fill="none"

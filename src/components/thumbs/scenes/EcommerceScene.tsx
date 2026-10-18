@@ -1,17 +1,18 @@
 "use client";
 
-import { C, Row, Stage, StoryScene, Token, rowPath } from "../StoryScene";
+import { Row, Stage, StoryScene, Token, rowPath, useC } from "../StoryScene";
 
 const DUR = 5;
 
 function Receipt({ x, y, highlight = false }: { x: number; y: number; highlight?: boolean }) {
+  const C = useC();
   return (
     <g>
-      <rect x={x} y={y} width="78" height="104" fill={C.ink} />
+      <rect x={x} y={y} width="78" height="104" fill={C.paper} />
       {[0, 1, 2, 3].map((i) => (
-        <rect key={i} x={x + 10} y={y + 14 + i * 16} width={i === 3 ? 30 : 58} height="7" fill="#c9c4bd" />
+        <rect key={i} x={x + 10} y={y + 14 + i * 16} width={i === 3 ? 30 : 58} height="7" fill={C.paperLine} />
       ))}
-      <rect x={x + 10} y={y + 84} width="58" height="9" fill={highlight ? C.gold : "#8a847d"} />
+      <rect x={x + 10} y={y + 84} width="58" height="9" fill={highlight ? C.gold : C.paperMark} />
     </g>
   );
 }

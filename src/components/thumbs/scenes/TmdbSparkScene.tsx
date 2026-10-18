@@ -1,12 +1,13 @@
 "use client";
 
-import { C, Row, Stage, StoryScene, Token, rowLayout, rowPath } from "../StoryScene";
+import { Row, Stage, StoryScene, Token, rowLayout, rowPath, useC } from "../StoryScene";
 
 const DUR = 5;
 const FRAME = 96;
 
 /** TMDB with PySpark: a film strip runs past and splits into four partitions processed in parallel. */
 export function TmdbSparkScene() {
+  const C = useC();
   const ks = rowLayout(3)[2];
   return (
     <StoryScene label="Animation: a film strip of movies from the TMDB API is processed in parallel by PySpark into return-on-investment figures by genre">
@@ -18,7 +19,7 @@ export function TmdbSparkScene() {
           </clipPath>
           <g clipPath="url(#tmdb-strip)">
             <g>
-              <rect x="0" y="84" width="1200" height="88" fill="#2b2621" />
+              <rect x="0" y="84" width="1200" height="88" fill={C.panel} />
               {Array.from({ length: 12 }, (_, i) => (
                 <g key={i}>
                   <rect x={10 + i * FRAME} y="98" width={FRAME - 20} height="60" fill={i % 4 === 1 ? C.gold : C.line} />

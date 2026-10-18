@@ -1,6 +1,6 @@
 "use client";
 
-import { C, Row, Stage, StoryScene, Token, rowPath } from "../../StoryScene";
+import { Row, Stage, StoryScene, Token, rowPath, useC } from "../../StoryScene";
 
 const DUR = 6;
 const ROWS = 6;
@@ -8,6 +8,7 @@ const VALUES = [0.45, 0.7, 0.35, 0.9, 0.55, 0.65];
 
 /** Analyst: a spreadsheet column is read cell by cell, and each cell becomes a bar of the chart. */
 export function AnalystScene() {
+  const C = useC();
   return (
     <StoryScene label="Animation: a spreadsheet column is read row by row and turned into a bar chart, with Excel, SQL and Power BI">
       {(still) => (
@@ -16,7 +17,7 @@ export function AnalystScene() {
           {/* The sheet */}
           {Array.from({ length: ROWS }, (_, r) =>
             [0, 1, 2].map((c) => (
-              <rect key={`${r}-${c}`} x={50 + c * 72} y={78 + r * 19} width="66" height="14" fill={c === 2 ? "#3a342e" : "#2b2621"} />
+              <rect key={`${r}-${c}`} x={50 + c * 72} y={78 + r * 19} width="66" height="14" fill={c === 2 ? C.line2 : C.panel} />
             )),
           )}
           {/* The reading cursor moves down the value column */}

@@ -1,4 +1,4 @@
-// Daily KPIs computed from the Lab7 sample data (trip_start.csv joined to trip_end.csv on trip_id).
+// Daily KPIs computed from the trip pipeline's sample data (trip_start.csv joined to trip_end.csv on trip_id).
 // Every one of the 4,999 matched trips was picked up on 2024-05-25.
 export const tripDay = {
   date: "2024-05-25",

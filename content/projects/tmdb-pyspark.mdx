@@ -4,7 +4,7 @@ summary: Distributed analysis of TMDB API data covering KPIs, franchise vs stand
 category: analytics
 stack: [PySpark, Python, TMDB API, Matplotlib]
 year: 2025
-repo: https://github.com/Hakeemwiki/LAB-1/tree/lab3
+repo: https://github.com/Hakeempy/DE-Projects/tree/lab3
 featured: false
 order: 9
 hook: "Movie data from TMDB, analysed in parallel with PySpark to find which films pay off."
@@ -54,8 +54,9 @@ laptop.
 
 ## What I would change next
 
-The retry adapter is mounted on a misspelled scheme, `htttps://`, so the retries for rate limits and
-server errors never apply to the real HTTPS calls. That is a one-line fix. I would also replace the
+The retry adapter was mounted on a misspelled scheme, `htttps://`, so the retries for rate limits and
+server errors never applied to the real HTTPS calls. That is
+[now fixed](https://github.com/Hakeempy/DE-Projects/commit/1b00587). Next I would replace the
 hard-coded rewrites that put genre and country lists into a standard order with a sort, so new
-combinations are handled too, and save the cleaned data as Parquet so the analysis can run again without
-calling the API.
+combinations are handled too, and save the cleaned data as Parquet so the analysis can run again
+without calling the API.

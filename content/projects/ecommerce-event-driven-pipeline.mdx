@@ -4,7 +4,7 @@ summary: CSV orders land in S3, then containerized validation and transformation
 category: data-engineering
 stack: [S3, Amazon ECS, Docker, Step Functions, DynamoDB, CloudWatch, SNS]
 year: 2025
-repo: https://github.com/Hakeemwiki/Lab6
+repo: https://github.com/Hakeempy/Lab6
 featured: false
 order: 7
 hook: "Order files land in S3, and containers turn them into live KPIs in DynamoDB."
@@ -51,8 +51,10 @@ work on the same batch at once.
 
 ## What I would change next
 
-The failure path sends the alert but never deletes the lock, and the trigger ignores new files while
-the lock exists. One failed run stops the pipeline until someone removes the lock by hand, so the
-failure branch should release it too. After that, I would replace the placeholder test with real unit
-tests, and reject order items that point at a missing order during validation, instead of letting the
-join drop them quietly.
+Writing this up turned up three gaps, and all three are now fixed. A failed run used to send the alert
+but keep the lock, so the pipeline stopped until someone removed it by hand; it now
+[releases the lock](https://github.com/Hakeempy/Lab6/commit/d16797f). Order items are
+[checked against known orders and products](https://github.com/Hakeempy/Lab6/commit/2061b3e) during
+validation instead of being dropped quietly by the join, and the placeholder test is
+[replaced with real unit tests](https://github.com/Hakeempy/Lab6/commit/68cddba). Next I would run those
+tests against a small set of sample files in CI, so a change to the rules is checked before it reaches AWS.

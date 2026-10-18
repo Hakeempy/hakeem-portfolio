@@ -1,6 +1,6 @@
 "use client";
 
-import { C, StoryScene } from "../StoryScene";
+import { StoryScene, useC } from "../StoryScene";
 
 const DUR = "6s";
 const ROUTE = "M70 300 L70 210 L190 210 L190 110 L300 110";
@@ -11,6 +11,7 @@ const ROUTE = "M70 300 L70 210 L190 210 L190 110 L300 110";
  * count goes from 4,999 to 5,000, as in the project's data for 25 May 2024.
  */
 export function TripScene() {
+  const C = useC();
   // Times as fractions of the 6 s loop.
   const fade = (on: number, off: number) => ({
     values: "0;0;1;1;0;0",

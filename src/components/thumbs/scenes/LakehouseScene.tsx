@@ -1,6 +1,6 @@
 "use client";
 
-import { C, Row, Stage, StoryScene, Token, rowPath } from "../StoryScene";
+import { Row, Stage, StoryScene, Token, rowPath, useC } from "../StoryScene";
 
 const DUR = 5;
 const ZONES = [
@@ -14,6 +14,7 @@ const ZONES = [
  * Delta Lake table in the warehouse, in gold; bad rows peel off into the rejected zone.
  */
 export function LakehouseScene() {
+  const C = useC();
   const main = `M110 130 L285 130 L460 130${rowPath(460, 130, 4).replace(/^M[^L]*/, " ")}`;
 
   return (
@@ -23,7 +24,7 @@ export function LakehouseScene() {
           <Stage />
           {ZONES.map((z) => (
             <g key={z.label}>
-              <rect x={z.x} y="56" width="150" height="138" fill="#2b2621" />
+              <rect x={z.x} y="56" width="150" height="138" fill={C.panel} />
               <text x={z.x + 12} y="184" fontSize="14" fill={C.muted}>
                 {z.label}
               </text>
@@ -31,19 +32,19 @@ export function LakehouseScene() {
           ))}
 
           {/* Raw: a workbook with three sheet tabs */}
-          <rect x="88" y="78" width="44" height="56" fill={C.ink} />
+          <rect x="88" y="78" width="44" height="56" fill={C.paper} />
           {[0, 1, 2].map((i) => (
             <rect key={i} x={88 + i * 15} y="136" width="13" height="7" fill={C.muted} />
           ))}
-          <text x="96" y="112" fontSize="13" fontWeight="500" fill={C.goldInk}>
+          <text x="96" y="112" fontSize="13" fontWeight="500" fill={C.paperInk}>
             XLSX
           </text>
 
           {/* Preprocessed: one CSV per sheet */}
           {[0, 1].map((i) => (
             <g key={i}>
-              <rect x={250 + i * 52} y="80" width="40" height="52" fill={C.ink} />
-              <text x={255 + i * 52} y="111" fontSize="12" fontWeight="500" fill={C.goldInk}>
+              <rect x={250 + i * 52} y="80" width="40" height="52" fill={C.paper} />
+              <text x={255 + i * 52} y="111" fontSize="12" fontWeight="500" fill={C.paperInk}>
                 CSV
               </text>
             </g>
@@ -55,7 +56,7 @@ export function LakehouseScene() {
 
           {/* Warehouse: a Delta table */}
           {[0, 1, 2, 3].map((i) => (
-            <rect key={i} x="420" y={76 + i * 18} width="110" height="12" fill={i === 0 ? C.gold : "#4a433c"} />
+            <rect key={i} x="420" y={76 + i * 18} width="110" height="12" fill={i === 0 ? C.gold : C.line} />
           ))}
 
           <Row

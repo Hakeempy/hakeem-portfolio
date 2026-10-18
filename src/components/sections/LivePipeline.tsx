@@ -4,8 +4,9 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { sampleTrip, tripDay } from "@/data/trips";
 import { Reveal } from "@/components/motion/Reveal";
+import { useTheme } from "@/components/theme/ThemeToggle";
 
-// The Lab7 validation rules, as written in that project's README.
+// The trip pipeline's validation rules, as written in that project's README.
 const DATETIME = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/;
 
 function validDatetime(value: string) {
@@ -94,6 +95,12 @@ function dailyKpis(completed: Completed): Kpi[] {
   return [...days.values()].filter((d) => d.count > 0).sort((a, b) => a.date.localeCompare(b.date));
 }
 
+// Stage marker colours per theme: waiting, passed, served (gold) and rejected.
+const MARKS = {
+  dark: { idle: "#3a342e", done: "#f4f1ec", served: "#c9a45a", failed: "#d96b5f", error: "#e08a7f" },
+  light: { idle: "#cec9c1", done: "#1a1714", served: "#a07b34", failed: "#b0453a", error: "#a3402f" },
+};
+
 const money = (n: number) =>
   n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -106,6 +113,7 @@ const STAGES = [
 
 export function LivePipeline() {
   const reduce = useReducedMotion();
+  const marks = MARKS[useTheme()];
   const [trip, setTrip] = useState<Trip>({
     tripId: "hakeem0001",
     pickup: "2024-05-25 18:40:00",
@@ -134,7 +142,7 @@ export function LivePipeline() {
       timers.current.push(
         window.setTimeout(() => {
           setStep(i);
-          // Like match_and_complete in Lab7: a trip_id that is already COMPLETED is not written again.
+          // Like match_and_complete in the trip pipeline: a trip_id that is already COMPLETED is not written again.
           if (i === 3 && r.ok && !r.duplicate) {
             setCompleted((prev) => ({ ...prev, [r.trip.tripId.trim()]: { date: r.date, fare: r.fare } }));
             setChangedDate(r.date);
@@ -176,7 +184,7 @@ export function LivePipeline() {
             Send a trip through&nbsp;it
           </h2>
           <p data-reveal style={{ "--i": 1 } as React.CSSProperties} className="mt-6 max-w-[44ch]">
-            This is the trip pipeline from my Lab7 project, small enough to run in your browser. The
+            This is my real-time trip pipeline, small enough to run in your browser. The
             day already holds {tripDay.tripCount.toLocaleString("en-US")} real trips from the
             project&rsquo;s data. Edit yours, send it, and watch it get checked, matched and counted.
             Break a date or a fare to see a rejection.
@@ -222,7 +230,7 @@ export function LivePipeline() {
                     aria-hidden
                     className="mt-[0.55em] block size-[10px]"
                     animate={{
-                      backgroundColor: failed ? "#d96b5f" : reached ? (i === 3 ? "#c9a45a" : "#f4f1ec") : "#3a342e",
+                      backgroundColor: failed ? marks.failed : reached ? (i === 3 ? marks.served : marks.done) : marks.idle,
                       scale: reached ? [1, 1.5, 1] : 1,
                     }}
                     transition={{ duration: reduce ? 0 : 0.42, ease: [0.22, 1, 0.36, 1] }}
@@ -232,7 +240,7 @@ export function LivePipeline() {
                       {stage.service}
                     </p>
                     <p className="mt-1 text-muted">{stage.job}</p>
-                    {result && reached && <StageOutput index={i} result={result} days={days} />}
+                    {result && reached && <StageOutput index={i} result={result} days={days} errorColor={marks.error} />}
                   </div>
                 </li>
               );
@@ -278,9 +286,24 @@ export function LivePipeline() {
   );
 }
 
-function StageOutput({ index, result, days }: { index: number; result: Result; days: Kpi[] }) {
+function StageOutput({
+  index,
+  result,
+  days,
+  errorColor,
+}: {
+  index: number;
+  result: Result;
+  days: Kpi[];
+  errorColor: string;
+}) {
   if (!result.ok) {
-    if (index === 1) return <p className="mt-2 text-[#e08a7f]">{result.reason}</p>;
+    if (index === 1)
+      return (
+        <p className="mt-2" style={{ color: errorColor }}>
+          {result.reason}
+        </p>
+      );
     return <p className="mt-2 text-ink">2 events received.</p>;
   }
   const t = result.trip;

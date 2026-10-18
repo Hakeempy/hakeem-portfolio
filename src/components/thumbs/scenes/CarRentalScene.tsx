@@ -1,6 +1,6 @@
 "use client";
 
-import { C, Row, Stage, StoryScene, Token, rowPath } from "../StoryScene";
+import { Row, Stage, StoryScene, Token, rowPath, useC } from "../StoryScene";
 
 const DUR = 5;
 const LOTS = [
@@ -12,6 +12,7 @@ const LOTS = [
 
 /** Car rentals: four locations; cars flash as they are rented and each lot's revenue bar fills. */
 export function CarRentalScene() {
+  const C = useC();
   return (
     <StoryScene label="Animation: cars are rented at four locations and the transactions flow through Spark on EMR Serverless and Glue crawlers into Athena">
       {(still) => (
@@ -19,7 +20,7 @@ export function CarRentalScene() {
           <Stage caption="rentals by location" />
           {LOTS.map((lot, l) => (
             <g key={lot.x}>
-              <rect x={lot.x} y="80" width="104" height="70" fill="#2b2621" />
+              <rect x={lot.x} y="80" width="104" height="70" fill={C.panel} />
               {Array.from({ length: lot.cars }, (_, c) => (
                 <rect key={c} x={lot.x + 10 + (c % 3) * 32} y={92 + Math.floor(c / 3) * 28} width="22" height="16" fill={C.muted}>
                   {!still && (

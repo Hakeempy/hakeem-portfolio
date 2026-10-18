@@ -1,6 +1,6 @@
 "use client";
 
-import { C, Row, Stage, StoryScene, Token, rowPath, showBetween } from "../StoryScene";
+import { Row, Stage, StoryScene, Token, rowPath, showBetween, useC } from "../StoryScene";
 
 const DUR = 6;
 const LINE = "M60 178 L120 170 L180 174 L240 160 L300 150 L360 152 L420 128 L480 112 L540 96";
@@ -8,6 +8,7 @@ const LENGTH = 520;
 
 /** Social media dashboard: engagement climbs across the chart and the +20% lift appears in gold. */
 export function SocialMediaScene() {
+  const C = useC();
   return (
     <StoryScene label="Animation: an engagement line climbs across a Power BI chart and a 20 percent lift in user interaction appears">
       {(still) => (

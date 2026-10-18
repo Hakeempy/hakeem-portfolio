@@ -1,6 +1,6 @@
 "use client";
 
-import { C, Row, Stage, StoryScene, Token, rowPath } from "../StoryScene";
+import { Row, Stage, StoryScene, Token, rowPath, useC } from "../StoryScene";
 
 const DUR = 6;
 const STOCK = [0.8, 0.6, 0.9, 0.5, 0.7, 0.85];
@@ -12,6 +12,7 @@ const MAX = 110;
  * drops below its reorder level it turns gold and lands on the restock list.
  */
 export function InventoryScene() {
+  const C = useC();
   const shrinking = 3;
   return (
     <StoryScene label="Animation: orders lower a product's stock level through a database trigger until it turns gold and is flagged for restock">

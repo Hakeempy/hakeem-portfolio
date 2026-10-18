@@ -1,6 +1,6 @@
 "use client";
 
-import { Bars, C, Row, Stage, StoryScene, Token, rowLayout, rowPath } from "../StoryScene";
+import { Bars, Row, Stage, StoryScene, Token, rowLayout, rowPath, useC } from "../StoryScene";
 
 // One ECG period, 120 units wide: flat, a small P wave, the QRS spike, a T wave, flat.
 const BEAT = "l18 0 l8 -8 l8 8 l10 0 l5 10 l7 -70 l7 82 l5 -22 l12 0 l10 -14 l10 14 l20 0";
@@ -12,6 +12,7 @@ const DUR = 4;
  * project's generator (outliers outside 60 to 100 bpm).
  */
 export function HeartbeatScene() {
+  const C = useC();
   const trace = `M0 140 ${Array.from({ length: 8 }, () => BEAT).join(" ")}`;
   const grafana = rowLayout(3)[2];
 

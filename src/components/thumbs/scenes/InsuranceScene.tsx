@@ -1,6 +1,6 @@
 "use client";
 
-import { C, Row, Stage, StoryScene, Token, rowPath } from "../StoryScene";
+import { Row, Stage, StoryScene, Token, rowPath, useC } from "../StoryScene";
 
 const DUR = 6;
 // The app's own inputs. Each knob moves between three settings; the estimate follows.
@@ -14,6 +14,7 @@ const ESTIMATE = [0.3, 0.85, 0.65];
 
 /** Insurance cost app: the sliders move and the model's estimate rises and falls with them. */
 export function InsuranceScene() {
+  const C = useC();
   const kt = "0;0.3;0.33;0.63;0.66;0.96;1";
   const hold = (v: number[]) => [v[0], v[0], v[1], v[1], v[2], v[2], v[0]].join(";");
   const TRACK_X = 130;
@@ -51,7 +52,7 @@ export function InsuranceScene() {
           <text x="390" y="88" fontSize="14" fill={C.muted}>
             estimated cost
           </text>
-          <rect x="390" y="100" width="150" height="90" fill="#2b2621" />
+          <rect x="390" y="100" width="150" height="90" fill={C.panel} />
           <rect x="390" y={190 - ESTIMATE[0] * 90} width="150" height={ESTIMATE[0] * 90} fill={C.gold}>
             {!still && (
               <>

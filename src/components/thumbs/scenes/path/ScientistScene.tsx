@@ -1,6 +1,6 @@
 "use client";
 
-import { C, Row, Stage, StoryScene, Token, rowPath, showBetween } from "../../StoryScene";
+import { Row, Stage, StoryScene, Token, rowPath, showBetween, useC } from "../../StoryScene";
 
 const DUR = 6;
 
@@ -9,6 +9,7 @@ const DUR = 6;
  * knowledge base and the answer arrives, grounded in them.
  */
 export function ScientistScene() {
+  const C = useC();
   return (
     <StoryScene label="Animation: a question to a RAG chatbot retrieves matching documents from a knowledge base and an answer is returned, with LangChain and Gemini">
       {(still) => (
@@ -17,8 +18,8 @@ export function ScientistScene() {
           {/* The chat */}
           <g opacity={still ? 1 : 0}>
             {!still && <animate dur={`${DUR}s`} {...showBetween(0.03, 0.92)} />}
-            <rect x="50" y="80" width="190" height="34" fill={C.ink} />
-            <rect x="62" y="93" width="120" height="8" fill="#a39d96" />
+            <rect x="50" y="80" width="190" height="34" fill={C.paper} />
+            <rect x="62" y="93" width="120" height="8" fill={C.paperLine} />
           </g>
           <g opacity={still ? 1 : 0}>
             {!still && <animate dur={`${DUR}s`} {...showBetween(0.6, 0.92)} />}

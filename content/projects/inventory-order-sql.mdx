@@ -4,7 +4,7 @@ summary: A SQL database design for e-commerce inventory and orders, with automat
 category: data-engineering
 stack: [SQL, MySQL]
 year: 2025
-repo: https://github.com/Hakeemwiki/LAB-1/tree/Lab-2
+repo: https://github.com/Hakeempy/DE-Projects/tree/Lab-2
 featured: false
 order: 11
 hook: "Every order updates stock by itself, and low shelves flag themselves for restock."
@@ -50,7 +50,8 @@ orders and of how much each customer spends.
 
 ## What I would change next
 
-The procedure starts a transaction but has no error handler, so if one line fails, for example because
-stock would go below zero, the lines before it are not rolled back. I would add a handler that rolls
-back and re-raises the error, and check stock before deducting it. Restocking is also manual today; a
-scheduled event could raise a restock request for everything in `LowStockProducts`.
+The procedure started a transaction with no error handler, so if one line failed, for example because
+stock would go below zero, the lines before it stayed applied. It now
+[rolls back and re-raises the error](https://github.com/Hakeempy/DE-Projects/commit/0774a09). Next I
+would check stock before deducting it, and let a scheduled event raise a restock request for everything
+in `LowStockProducts`, since restocking is still manual.

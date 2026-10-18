@@ -1,12 +1,13 @@
 "use client";
 
-import { C, Row, Stage, StoryScene, Token, rowPath } from "../StoryScene";
+import { Row, Stage, StoryScene, Token, rowPath, useC } from "../StoryScene";
 
 const DUR = 5;
 const ARC = "M80 180 Q300 20 520 150";
 
 /** Flight prices: a plane crosses its route; each fare it carries flows into the KPI pipeline. */
 export function FlightScene() {
+  const C = useC();
   return (
     <StoryScene label="Animation: a plane flies a route out of Bangladesh while fares flow through MySQL, Airflow and PostgreSQL to a Grafana dashboard">
       {(still) => (

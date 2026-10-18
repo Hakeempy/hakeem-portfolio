@@ -1,6 +1,6 @@
 "use client";
 
-import { C, Row, Stage, StoryScene, Token, rowPath } from "../../StoryScene";
+import { Row, Stage, StoryScene, Token, rowPath, useC } from "../../StoryScene";
 
 const DUR = 5;
 const SITES = [60, 230, 400];
@@ -10,6 +10,7 @@ const SITES = [60, 230, 400];
  * and Dockerized microservices to the monitoring dashboards.
  */
 export function EngineerScene() {
+  const C = useC();
   return (
     <StoryScene label="Animation: sensors at three production sites send readings through Kafka and Dockerized microservices to Grafana monitoring">
       {(still) => (
@@ -17,7 +18,7 @@ export function EngineerScene() {
           <Stage caption="IoT sensors across production sites" />
           {SITES.map((x, s) => (
             <g key={x}>
-              <rect x={x} y="80" width="140" height="104" fill="#2b2621" />
+              <rect x={x} y="80" width="140" height="104" fill={C.panel} />
               {/* The building's roofline, as filled blocks */}
               <rect x={x + 14} y="128" width="40" height="44" fill={C.line} />
               <rect x={x + 62} y="112" width="30" height="60" fill={C.line} />

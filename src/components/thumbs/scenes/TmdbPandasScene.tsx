@@ -1,6 +1,6 @@
 "use client";
 
-import { C, Row, Stage, StoryScene, Token, rowPath } from "../StoryScene";
+import { Row, Stage, StoryScene, Token, rowPath, useC } from "../StoryScene";
 
 const DUR = 6;
 // Five films whose bars re-rank: [length, row before, row after]. The gold one rises to the top.
@@ -14,6 +14,7 @@ const FILMS: [number, number, number][] = [
 
 /** TMDB with pandas: films re-rank by revenue as the data is cleaned and enriched. */
 export function TmdbPandasScene() {
+  const C = useC();
   const y = (row: number) => 80 + row * 24;
   return (
     <StoryScene label="Animation: films are re-ranked by revenue as TMDB data is cleaned with pandas and analysed in Jupyter">

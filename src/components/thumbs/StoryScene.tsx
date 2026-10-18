@@ -3,6 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { useReducedMotion } from "motion/react";
 import { icons, type IconName } from "./icons";
+import { useTheme } from "@/components/theme/ThemeToggle";
 
 /*
  * The kit for the animated thumbnails. Every scene is a 600 by 400 SVG: the project's subject
@@ -12,15 +13,46 @@ import { icons, type IconName } from "./icons";
  * screen, and visitors who turn motion off get the still frame.
  */
 
-export const C = {
+// One palette per theme. Dark scenes are lit screens in a dark room; light scenes are pale
+// screens on a stone wall. "paper" is for files, receipts and chat bubbles inside a scene.
+const DARK = {
   ground: "#181512",
   block: "#231f1b",
+  panel: "#2b2621",
   line: "#4a433c",
+  line2: "#3a342e",
   muted: "#a39d96",
   ink: "#f4f4f3",
   gold: "#c9a45a",
   goldInk: "#0c0a08",
+  paper: "#f4f4f3",
+  paperInk: "#0c0a08",
+  paperLine: "#c9c4bd",
+  paperMark: "#8a847d",
 };
+
+const LIGHT: typeof DARK = {
+  ground: "#e6e3dd",
+  block: "#d8d4cd",
+  panel: "#cec9c1",
+  line: "#a39c91",
+  line2: "#bdb7ad",
+  muted: "#5f5952",
+  ink: "#1a1714",
+  gold: "#b48a3e",
+  goldInk: "#15120f",
+  paper: "#ffffff",
+  paperInk: "#1a1714",
+  paperLine: "#dcd8d1",
+  paperMark: "#9c958b",
+};
+
+export type SceneColors = typeof DARK;
+
+/** The scene palette for the current theme. Call it at the top of any component that draws. */
+export function useC(): SceneColors {
+  return useTheme() === "light" ? LIGHT : DARK;
+}
 
 export const STAGE = { x: 30, y: 40, w: 540, h: 170 };
 export const ROW = { y: 250, h: 110, gap: 20, lane: 230 };
@@ -32,6 +64,7 @@ export function StoryScene({
   label: string;
   children: (still: boolean) => ReactNode;
 }) {
+  const C = useC();
   const ref = useRef<SVGSVGElement>(null);
   const reduce = useReducedMotion() ?? false;
 
@@ -63,6 +96,7 @@ export function StoryScene({
 
 /** The stage backdrop: one block where the subject is drawn. */
 export function Stage({ caption }: { caption?: string }) {
+  const C = useC();
   return (
     <>
       <rect x={STAGE.x} y={STAGE.y} width={STAGE.w} height={STAGE.h} fill={C.block} />
@@ -105,6 +139,7 @@ export function Box({
   icon,
   served = false,
 }: Step & { x: number; y: number; w: number; h: number; served?: boolean }) {
+  const C = useC();
   const ink = served ? C.goldInk : C.ink;
   const soft = served ? C.goldInk : C.muted;
   // The name shrinks in narrow boxes so the longest ones ("PostgreSQL", "Step Functions") fit.
@@ -158,6 +193,7 @@ export function Token({
   size?: number;
   still: boolean;
 }) {
+  const C = useC();
   if (still) return null;
   return (
     <rect x={-size / 2} y={-size / 2} width={size} height={size} fill={gold ? C.gold : C.ink} opacity="0">
@@ -185,7 +221,7 @@ export function Bars({
   highlight,
   dur = 4,
   still,
-  ink = C.line,
+  ink,
 }: {
   x: number;
   base: number;
@@ -198,13 +234,14 @@ export function Bars({
   still: boolean;
   ink?: string;
 }) {
+  const C = useC();
   return (
     <>
       {values.map((v, i) => {
         const h = v * max;
         const low = h * 0.6 + 4;
         return (
-          <rect key={i} x={x + i * (width + gap)} y={base - h} width={width} height={h} fill={i === highlight ? C.gold : ink}>
+          <rect key={i} x={x + i * (width + gap)} y={base - h} width={width} height={h} fill={i === highlight ? C.gold : (ink ?? C.line)}>
             {!still && (
               <>
                 <animate attributeName="height" values={`${h};${low};${h}`} dur={`${dur}s`} begin={`${i * 0.25}s`} repeatCount="indefinite" />
