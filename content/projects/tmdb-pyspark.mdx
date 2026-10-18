@@ -26,8 +26,8 @@ laptop.
 ## How it works
 
 1. `fetch_movie_data` calls the TMDB API for each movie, with its credits, and turns each response into
-   a Spark `Row`. The list has 19 IDs. One of them is 0, which does not exist, so it is logged and
-   skipped.
+   a Spark `Row`. A shared session retries rate limits and server errors with backoff. The list has 19
+   IDs. One of them is 0, which does not exist, so it is logged and skipped.
 2. `build_schema` declares the full structure up front: arrays of structs for genres, companies,
    countries and languages, a map for the collection, and nested cast and crew lists.
 3. `clean_movie_data` flattens it with Spark's higher-order functions. `transform` pulls the names out of
@@ -54,9 +54,6 @@ laptop.
 
 ## What I would change next
 
-The retry adapter was mounted on a misspelled scheme, `htttps://`, so the retries for rate limits and
-server errors never applied to the real HTTPS calls. That is
-[now fixed](https://github.com/Hakeempy/DE-Projects/commit/1b00587). Next I would replace the
-hard-coded rewrites that put genre and country lists into a standard order with a sort, so new
-combinations are handled too, and save the cleaned data as Parquet so the analysis can run again
-without calling the API.
+I would replace the hard-coded rewrites that put genre and country lists into a standard order with a
+sort, so new combinations are handled too, and save the cleaned data as Parquet so the analysis can run
+again without calling the API.

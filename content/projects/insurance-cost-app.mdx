@@ -30,8 +30,9 @@ from a trained model.
    about 2,450, against 0.78 and about 4,190 for linear regression.
 3. Gradient boosting is retrained on all 1,338 rows and saved with Joblib.
 4. `ML_web_app.py` is a Streamlit app that loads the saved model and asks for age, sex, BMI, number of
-   children, smoking status and region. When you press Predict, it encodes the answers the way the
-   training data was encoded and shows the estimated cost.
+   children, smoking status and region, within the ranges the model was trained on (ages 18 to 64, up
+   to 5 children). When you press Predict, it encodes the answers the way the training data was encoded
+   and shows the estimated cost.
 5. A Procfile and a setup script run Streamlit headless on the port the host provides, and a dev
    container configuration starts the app in GitHub Codespaces.
 
@@ -46,9 +47,6 @@ from a trained model.
 
 ## What I would change next
 
-Reading the code for this write-up turned up a bug: the branch meant for northwest checked for southwest
-a second time, so northwest was sent as the code for northeast. The sliders also allowed ages up to 100
-and at most 4 children, outside the training data (ages 18 to 64, up to 5 children). Both are now fixed
-in [the app](https://github.com/Hakeempy/ML-WEB-APP/commit/4e3443c). Next I would save the encoding
-together with the model in one scikit-learn pipeline, so the app and the training can never drift apart
-again.
+I would save the encoding together with the model in one scikit-learn pipeline, so the app and the
+training always encode answers the same way, and show a range around the estimate rather than a single
+number.

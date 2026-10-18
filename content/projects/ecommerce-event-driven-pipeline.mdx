@@ -30,7 +30,8 @@ work on the same batch at once.
 2. Before starting, the Lambda writes a `pipeline.lock` object to S3. While it exists, new files do not
    start another run.
 3. A validation container on ECS Fargate checks each row for required fields, numeric types and a
-   known order status, and writes rejected rows to `rejected/` with the file name and row number.
+   known order status, and checks that every order item points to a known order and product. Rejected
+   rows go to `rejected/` with the file name and row number.
 4. A second container runs a Spark job that joins orders, items and products, removes duplicate order
    lines, merges the result into a Delta table in S3 partitioned by date, and computes the KPIs.
 5. Revenue, average order value and return rate per category go to `CategoryKPIs`; orders, revenue,
@@ -46,15 +47,11 @@ work on the same batch at once.
   table needs a secondary index.
 - **Only write what changed.** The job reads the current item before each DynamoDB write and skips it
   if the numbers are the same, so a rerun does not rewrite the tables.
-- **A loud failure.** Anything that still fails after its retries sends an SNS alert and records a
-  failure metric in CloudWatch.
+- **A loud failure that does not block.** Anything that still fails after its retries sends an SNS
+  alert, records a failure metric in CloudWatch and releases the lock, so the next batch still runs.
+- **Tested rules.** Unit tests cover every validation rule, run against local CSVs in place of S3.
 
 ## What I would change next
 
-Writing this up turned up three gaps, and all three are now fixed. A failed run used to send the alert
-but keep the lock, so the pipeline stopped until someone removed it by hand; it now
-[releases the lock](https://github.com/Hakeempy/Lab6/commit/d16797f). Order items are
-[checked against known orders and products](https://github.com/Hakeempy/Lab6/commit/2061b3e) during
-validation instead of being dropped quietly by the join, and the placeholder test is
-[replaced with real unit tests](https://github.com/Hakeempy/Lab6/commit/68cddba). Next I would run those
-tests against a small set of sample files in CI, so a change to the rules is checked before it reaches AWS.
+I would run the unit tests against a small set of sample files in CI, so a change to the rules is
+checked before it reaches AWS.

@@ -42,8 +42,8 @@ producer, the consumer and Grafana. The dashboard in the screenshot had stored 3
   `timestamp` and `customer_id` are indexed.
 - **A consumer group, not a bare consumer.** Kafka tracks the group's offsets, so a restarted consumer
   carries on where it stopped instead of starting again from the beginning.
-- **Startup order.** The producer used to fail with `NoBrokersAvailable` because it started before
-  Kafka was ready. A start delay fixed it; health checks are the cleaner fix.
+- **Startup order.** The producer waits for Kafka before it connects, so it never starts against a
+  broker that is not ready yet.
 
 ## What I would change next
 

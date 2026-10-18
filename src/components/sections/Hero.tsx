@@ -4,6 +4,7 @@ import { site } from "@/data/site";
 import { certifications } from "@/data/certifications";
 import { DataJourney } from "@/components/three/DataJourney";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { HeroHeadline } from "@/components/sections/HeroHeadline";
 
 /**
  * The hero: the raw-to-gold particle pipeline fills the first screen, with the name, the
@@ -49,13 +50,10 @@ export function Hero() {
       </nav>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 grid gap-6 px-margin pb-[clamp(24px,4vw,56px)] lg:grid-cols-12 lg:items-end">
-        <h1
-          data-rise
+        <HeroHeadline
           style={{ "--i": 1 } as React.CSSProperties}
           className="display max-w-[16ch] text-[clamp(2.5rem,1rem+5.4vw,6.5rem)] leading-[0.98] font-medium tracking-[-0.04em] lg:col-span-8"
-        >
-          I build the pipelines your data runs&nbsp;on.
-        </h1>
+        />
         <div data-rise style={{ "--i": 3 } as React.CSSProperties} className="pointer-events-auto lg:col-span-3 lg:col-start-10">
           <p className="max-w-[30ch] text-muted">
             Data engineer. Analyst first, and still a data analytics course instructor and

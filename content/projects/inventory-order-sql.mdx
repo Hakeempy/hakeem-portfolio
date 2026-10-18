@@ -27,7 +27,8 @@ orders and of how much each customer spends.
 2. `PlaceMultipleOrder` takes a customer ID and two comma-separated lists, product IDs and quantities.
    Inside a transaction it creates the order, works through the lists, looks up each price, applies a
    quantity discount, writes the order lines, reduces stock, and finally records the order's total
-   amount and item count.
+   amount and item count. If any line fails, for example because stock would go below zero, the whole
+   order rolls back and the error is raised.
 3. The trigger `trg_log_inventory_change` fires after any update to a product's stock and writes the
    difference to `Inventory_Logs`, labelled "Order Placement" or "Stock Replenishment".
 4. `ReplenishStock` adds stock back, and the same trigger logs it.
@@ -50,8 +51,5 @@ orders and of how much each customer spends.
 
 ## What I would change next
 
-The procedure started a transaction with no error handler, so if one line failed, for example because
-stock would go below zero, the lines before it stayed applied. It now
-[rolls back and re-raises the error](https://github.com/Hakeempy/DE-Projects/commit/0774a09). Next I
-would check stock before deducting it, and let a scheduled event raise a restock request for everything
-in `LowStockProducts`, since restocking is still manual.
+I would check stock before deducting it, so a short order gets a clear message, and let a scheduled event
+raise a restock request for everything in `LowStockProducts`, since restocking is still manual.
