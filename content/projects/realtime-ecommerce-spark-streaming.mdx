@@ -15,10 +15,43 @@ coverAlt: "Architecture diagram: a data generator writes CSV files every 15 seco
 focus: "50% 50%"
 ---
 
-## Problem
+## The problem
 
-TODO
+An online store produces a steady stream of events: people viewing products and buying them. To analyse
+that while it happens, the events have to be picked up as they arrive, cleaned, and stored somewhere
+that can be queried straight away. The task was to build that pipeline with Spark Structured Streaming
+and PostgreSQL, and to make it run the same way on any machine.
 
-## Architecture
+## How it works
 
-TODO
+1. `data_generator.py` uses Faker to create between 100 and 1,000 events at a time, each with a user,
+   an event type (view or purchase), one of five products and a UTC timestamp. Every 15 seconds it
+   writes them to a new timestamped CSV file in `data/`.
+2. Spark, in its own container, watches that folder as a stream. It reads each new file against a
+   fixed schema, one file per micro-batch.
+3. Each batch drops events that share the same user and timestamp.
+4. `foreachBatch` appends each batch to the `events` table in PostgreSQL over JDBC, 1,500 rows per
+   insert.
+5. Docker Compose starts PostgreSQL first, where a setup script creates the table and its indexes, then
+   starts Spark on the same network.
+
+## Decisions worth explaining
+
+- **A declared schema.** A streaming file source needs its schema up front. Declaring it also fixes the
+  types from the first read: prices are doubles and `event_time` is a real timestamp, not text.
+- **One file per trigger.** `maxFilesPerTrigger` is set to 1, which keeps every micro-batch small and
+  predictable. It is also the first setting to raise when the volume grows.
+- **The database checks too.** The table only accepts `view` and `purchase` as event types, requires the
+  fields that matter, and is indexed on `event_time` and `user_id` for queries by time and by customer.
+- **Checkpoints for restarts.** Spark records its progress in `/data/checkpoints`, so a restarted job
+  carries on from the last file it finished instead of loading everything again.
+- **`foreachBatch` as the sink.** Spark has no built-in streaming sink for PostgreSQL. `foreachBatch`
+  reuses the ordinary JDBC writer, and logs success or raises an error for each batch.
+
+## What I would change next
+
+The generator reads its batch sizes and interval from `.env` but then uses hard-coded values, so
+changing the settings does nothing. That is the first fix. Next is the deduplication: without a
+watermark, Spark keeps every user and timestamp it has seen in memory for as long as the stream runs. A
+watermark on `event_time` would put a limit on that. Finally, Spark can replay a batch after a failure,
+so a unique key on the table would stop a replay from inserting the same events twice.

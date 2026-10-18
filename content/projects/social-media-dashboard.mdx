@@ -11,6 +11,37 @@ hook: "A Power BI dashboard whose insights lifted user interaction by 20%."
 fact: "Power BI"
 ---
 
-## Problem
+## The problem
 
-TODO
+A single table of social media activity: likes and reactions, shares and retweets, followers,
+following and user interactions, broken down by user, platform, media type, country and year. The
+question was where engagement comes from and how it differs from one platform to the next, answered in
+one report that anyone could filter on their own.
+
+## How it works
+
+1. Power Query loads the data and prepares it as one table for the report.
+2. The home page leads with five cards (total likes and reactions, shares, user interactions, followers
+   and following), then likes by platform as a column chart and likes by country on a map.
+3. Slicers for platform, media type, year and username filter every visual on the page.
+4. Seven platform icons, for Facebook, Instagram, Twitter, YouTube, Spotify, Twitch and GoodReads, work
+   as navigation buttons. Each opens a page with the same cards plus a chart of followers against
+   engagement and a treemap of user interactions.
+
+Acting on what the report showed led to a 20% increase in user interaction, and moving the preparation
+steps into Power Query made data processing 25% faster.
+
+## Decisions worth explaining
+
+- **One table.** All the data sits in a single table, so every slicer reaches every visual with no
+  relationships to manage.
+- **The same layout on every page.** Cards and charts stay in the same place as you move between
+  platforms, so the comparison is in the numbers rather than in finding them.
+- **Navigation inside the report.** The platform icons sit on every page, so any platform is one click
+  away wherever you are.
+
+## What I would change next
+
+Year is only a slicer, so the report cannot show engagement rising or falling over time. I would add a
+trend by year for each platform, and a page that compares the platforms side by side instead of one at
+a time.

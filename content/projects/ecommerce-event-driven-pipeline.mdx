@@ -15,14 +15,44 @@ coverAlt: "Dashboard of daily revenue by product category built on the pipeline 
 focus: "50% 50%"
 ---
 
-## Problem
+## The problem
 
-TODO
+An e-commerce platform drops its orders, order items and product catalogue into S3 as CSV files, a few
+at a time, throughout the day. The business wanted daily KPIs for each product category and for each
+day that it could look up quickly. Nobody should have to start a job by hand, and two runs should never
+work on the same batch at once.
 
-## Architecture
+## How it works
 
-TODO
+1. Every file that lands under `incoming/` triggers a Lambda function. It starts the Step Functions
+   state machine once at least five order files, five order item files and the product file are
+   waiting, or after 30 minutes of falling short, so a slow day is still processed.
+2. Before starting, the Lambda writes a `pipeline.lock` object to S3. While it exists, new files do not
+   start another run.
+3. A validation container on ECS Fargate checks each row for required fields, numeric types and a
+   known order status, and writes rejected rows to `rejected/` with the file name and row number.
+4. A second container runs a Spark job that joins orders, items and products, removes duplicate order
+   lines, merges the result into a Delta table in S3 partitioned by date, and computes the KPIs.
+5. Revenue, average order value and return rate per category go to `CategoryKPIs`; orders, revenue,
+   items sold, return rate and unique customers per day go to `OrderKPIs`, both in DynamoDB. The input
+   files move to a timestamped `archive/` folder, and the last step deletes the lock.
 
-## What I learned
+## Decisions worth explaining
 
-TODO
+- **Containers for the heavy work.** Validation and transformation are separate ECS tasks, so the Spark
+  job gets the memory and time it needs, and each step retries on its own with exponential backoff.
+- **Keys shaped by the questions.** Category KPIs are read by category over a range of dates, so
+  category is the partition key and date the sort key. Daily totals only need the date, so neither
+  table needs a secondary index.
+- **Only write what changed.** The job reads the current item before each DynamoDB write and skips it
+  if the numbers are the same, so a rerun does not rewrite the tables.
+- **A loud failure.** Anything that still fails after its retries sends an SNS alert and records a
+  failure metric in CloudWatch.
+
+## What I would change next
+
+The failure path sends the alert but never deletes the lock, and the trigger ignores new files while
+the lock exists. One failed run stops the pipeline until someone removes the lock by hand, so the
+failure branch should release it too. After that, I would replace the placeholder test with real unit
+tests, and reject order items that point at a missing order during validation, instead of letting the
+join drop them quietly.
