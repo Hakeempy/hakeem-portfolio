@@ -12,8 +12,9 @@ import { HeroHeadline } from "@/components/sections/HeroHeadline";
  */
 export function Hero() {
   return (
-    <header className="relative h-svh min-h-[640px] overflow-hidden">
-      <DataJourney className="absolute inset-0" />
+    <header className="relative flex min-h-svh flex-col overflow-hidden lg:block lg:h-svh lg:min-h-[640px]">
+      {/* Phones and tablets: the stream has its own space above the text. Desktop: it fills the hero. */}
+      <DataJourney className="relative min-h-[300px] flex-1 lg:absolute lg:inset-0" />
 
       <nav
         aria-label="Main"
@@ -49,15 +50,15 @@ export function Hero() {
         </div>
       </nav>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 grid gap-6 px-margin pb-[clamp(24px,4vw,56px)] lg:grid-cols-12 lg:items-end">
+      <div className="pointer-events-none relative z-10 grid gap-6 px-margin pb-[clamp(24px,4vw,56px)] lg:absolute lg:inset-x-0 lg:bottom-0 lg:grid-cols-12 lg:items-end">
         <HeroHeadline
           style={{ "--i": 1 } as React.CSSProperties}
           className="display max-w-[16ch] text-[clamp(2.5rem,1rem+5.4vw,6.5rem)] leading-[0.98] font-medium tracking-[-0.04em] lg:col-span-8"
         />
         <div data-rise style={{ "--i": 3 } as React.CSSProperties} className="pointer-events-auto lg:col-span-3 lg:col-start-10">
           <p className="max-w-[30ch] text-muted">
-            Data engineer. Analyst first, and still a data analytics course instructor and
-            consultant. From a raw record to a trusted number, on AWS.
+            Data engineer, analyst, course instructor and consultant. Whatever the role, the job is
+            the same: turn a raw record into a number you can trust.
           </p>
           <a href="#certification" className="group mt-5 flex items-center gap-3">
             <Image

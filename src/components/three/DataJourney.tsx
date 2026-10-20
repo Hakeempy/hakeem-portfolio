@@ -395,17 +395,18 @@ const CAMERA_AT = new THREE.Vector3(-2, 1.6, 0);
 const LOOK_AT = new THREE.Vector3(-0.2, 0.4, 0);
 
 /**
- * The nearest camera distance at which every frame point fits on screen, inside the band above
- * the headline. Found by bisection for the window's shape, so no stage is ever cut off.
- */
-/**
  * The framing for a window shape: where the camera aims (its look height) and how far back it
  * stands. For each look height, bisection finds the nearest distance at which every frame point
  * fits on screen inside its band; the look height that allows the nearest camera wins. So no
  * stage is cut off, the gold block clears the text column, and the stream stays as large as it can.
  */
-function fitFraming(aspect: number) {
-  const cam = new THREE.PerspectiveCamera(38, aspect, 0.1, 200);
+function fitFraming(width: number, height: number) {
+  const cam = new THREE.PerspectiveCamera(38, width / height, 0.1, 200);
+  // On a wide screen the canvas fills the hero and the stream keeps to the band above the headline.
+  // Below lg the canvas has its own box above the text, so the stream can use all of it, short of
+  // the navigation and the stage labels at the top.
+  const own = width < 1024;
+  const maxY = own ? 1 - (2 * 120) / height : 0.76;
   const v = new THREE.Vector3();
   const fits = (z: number, lookY: number) => {
     cam.position.set(CAMERA_AT.x, CAMERA_AT.y, z);
@@ -413,8 +414,7 @@ function fitFraming(aspect: number) {
     cam.updateMatrixWorld();
     return FRAME_POINTS.every(({ p, minY }) => {
       v.copy(p).project(cam);
-      // Above the headline and the text column, below the navigation.
-      return Math.abs(v.x) <= 0.94 && v.y <= 0.76 && v.y >= minY;
+      return Math.abs(v.x) <= 0.94 && v.y <= maxY && v.y >= (own ? -0.9 : minY);
     });
   };
   let best = { z: 60, lookY: LOOK_AT.y };
@@ -429,14 +429,36 @@ function fitFraming(aspect: number) {
     }
     if (hi < best.z) best = { z: hi, lookY };
   }
-  return best;
+  if (!own) return best;
+  // A narrow box is bound by its width, so many look heights fit; take the one that centres the
+  // stream in the space between the labels and the headline.
+  const z = best.z * 1.02;
+  const mid = (maxY - 0.9) / 2;
+  let centred = best;
+  let err = Infinity;
+  for (let lookY = -3; lookY <= 1.5; lookY += 0.05) {
+    if (!fits(z, lookY)) continue;
+    let top = -Infinity;
+    let bottom = Infinity;
+    for (const { p } of FRAME_POINTS) {
+      v.copy(p).project(cam);
+      top = Math.max(top, v.y);
+      bottom = Math.min(bottom, v.y);
+    }
+    const e = Math.abs((top + bottom) / 2 - mid);
+    if (e < err) {
+      err = e;
+      centred = { z, lookY };
+    }
+  }
+  return centred;
 }
 
 /** The camera drifts toward the pointer and travels a little way down the line as the page scrolls. */
 function Rig({ still }: { still: boolean }) {
   const { camera, pointer, size, scene } = useThree();
   const scroll = useRef(0);
-  const framing = useMemo(() => fitFraming(size.width / size.height), [size.width, size.height]);
+  const framing = useMemo(() => fitFraming(size.width, size.height), [size.width, size.height]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -497,6 +519,7 @@ export function DataJourney({ className = "" }: { className?: string }) {
       onClick={() => (io.current.surge = 1)}
     >
       <Canvas
+        style={{ position: "absolute", inset: 0 }}
         camera={{ position: [-2, 1.6, 11.5], fov: 38 }}
         dpr={[1, 2]}
         frameloop={still || !visible ? "demand" : "always"}
