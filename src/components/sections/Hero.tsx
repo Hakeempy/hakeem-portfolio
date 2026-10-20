@@ -37,8 +37,8 @@ export function Hero() {
               </a>
             </li>
             <li>
-              <a className="link hover:text-ink" href="#teaching">
-                Teaching
+              <a className="link hover:text-ink" href="#courses">
+                Courses
               </a>
             </li>
           </ul>

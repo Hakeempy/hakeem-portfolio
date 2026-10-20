@@ -24,7 +24,7 @@ export function Footer() {
             <a className="link" href="#path">About</a>
           </li>
           <li>
-            <a className="link" href="#teaching">Teaching</a>
+            <a className="link" href="#courses">Courses</a>
           </li>
         </ul>
         <ul className="space-y-1 sm:text-right">

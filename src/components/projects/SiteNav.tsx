@@ -30,8 +30,8 @@ export function SiteNav({ current }: { current?: "projects" }) {
             </Link>
           </li>
           <li>
-            <Link className="link hover:text-ink" href="/#teaching">
-              Teaching
+            <Link className="link hover:text-ink" href="/#courses">
+              Courses
             </Link>
           </li>
         </ul>
