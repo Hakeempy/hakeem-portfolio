@@ -3,7 +3,7 @@ export const site = {
   role: "Data Engineer",
   location: "Accra, Ghana",
   tagline:
-    "Data engineer and analyst. I build pipelines that move and clean data, turn it into answers people can act on, and teach and advise teams who want to do the same.",
+    "Data engineer, analyst, course instructor and consultant. I build pipelines that move and clean data, turn it into answers people can act on, and teach and advise teams who want to do the same.",
   email: "hakeemwikireh@gmail.com",
   links: {
     github: "https://github.com/Hakeempy",
