@@ -57,8 +57,8 @@ export function Hero() {
         />
         <div data-rise style={{ "--i": 3 } as React.CSSProperties} className="pointer-events-auto lg:col-span-3 lg:col-start-10">
           <p className="max-w-[30ch] text-muted">
-            Data engineer, analyst, course instructor and consultant. Whatever the role, the job is
-            the same: turn a raw record into a number you can trust.
+            Data engineer and analyst. I move and clean data, turn it into answers people can act
+            on, and teach and advise teams who want to do the same.
           </p>
           <a href="#certification" className="group mt-5 flex items-center gap-3">
             <Image
