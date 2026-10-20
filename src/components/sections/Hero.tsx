@@ -12,9 +12,10 @@ import { HeroHeadline } from "@/components/sections/HeroHeadline";
  */
 export function Hero() {
   return (
-    <header className="relative flex min-h-svh flex-col overflow-hidden lg:block lg:h-svh lg:min-h-[640px]">
-      {/* Phones and tablets: the stream has its own space above the text. Desktop: it fills the hero. */}
-      <DataJourney className="relative min-h-[300px] flex-1 lg:absolute lg:inset-0" />
+    <header className="relative overflow-hidden lg:h-svh lg:min-h-[640px]">
+      {/* Phones and tablets: the stream gets a band sized to it, with the text right below.
+          Desktop: it fills the hero behind the text. */}
+      <DataJourney className="relative h-[clamp(260px,72vw,440px)] lg:absolute lg:inset-0 lg:h-auto" />
 
       <nav
         aria-label="Main"

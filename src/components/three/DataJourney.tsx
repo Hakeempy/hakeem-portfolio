@@ -367,7 +367,7 @@ function Labels({ refs }: { refs: React.RefObject<(HTMLElement | null)[]> }) {
       v.y += i === 3 ? 1.4 : gate.t < 0.4 ? 2.9 : gate.t < 0.6 ? 2 : 1.3;
       v.project(camera);
       // Labels stay clear of the navigation bar at the top.
-      const top = Math.max(((1 - v.y) / 2) * size.height, 110);
+      const top = Math.max(((1 - v.y) / 2) * size.height, size.width < 1024 ? 96 : 110);
       el.style.transform = `translate(${((v.x + 1) / 2) * size.width}px, ${top}px) translate(-50%, -100%)`;
     });
   });
@@ -406,7 +406,7 @@ function fitFraming(width: number, height: number) {
   // Below lg the canvas has its own box above the text, so the stream can use all of it, short of
   // the navigation and the stage labels at the top.
   const own = width < 1024;
-  const maxY = own ? 1 - (2 * 120) / height : 0.76;
+  const maxY = own ? 1 - (2 * 100) / height : 0.76;
   const v = new THREE.Vector3();
   const fits = (z: number, lookY: number) => {
     cam.position.set(CAMERA_AT.x, CAMERA_AT.y, z);
@@ -414,7 +414,7 @@ function fitFraming(width: number, height: number) {
     cam.updateMatrixWorld();
     return FRAME_POINTS.every(({ p, minY }) => {
       v.copy(p).project(cam);
-      return Math.abs(v.x) <= 0.94 && v.y <= maxY && v.y >= (own ? -0.9 : minY);
+      return Math.abs(v.x) <= 0.94 && v.y <= maxY && v.y >= (own ? -0.92 : minY);
     });
   };
   let best = { z: 60, lookY: LOOK_AT.y };
@@ -433,7 +433,7 @@ function fitFraming(width: number, height: number) {
   // A narrow box is bound by its width, so many look heights fit; take the one that centres the
   // stream in the space between the labels and the headline.
   const z = best.z * 1.02;
-  const mid = (maxY - 0.9) / 2;
+  const mid = (maxY - 0.92) / 2;
   let centred = best;
   let err = Infinity;
   for (let lookY = -3; lookY <= 1.5; lookY += 0.05) {
