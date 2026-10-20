@@ -18,7 +18,7 @@ export function Teaching() {
           data-reveal
           className="text-lead leading-[1.25] tracking-[-0.015em] text-muted md:col-span-6 md:col-start-2"
         >
-          Since {n("2022")} I have taught {n("100+ students")} and professionals to work with
+          Since {n("2022")} I have taught {n("50+ students")} and professionals to work with
           data in {n("5 tools")}, and {n("95%")} of them left satisfied.
         </p>
 

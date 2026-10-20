@@ -26,7 +26,7 @@ Bad input is rejected with the rule that rejected it. Without JavaScript the las
 | Live pipeline | You can try one. | Lab7's rules and data, in the browser. |
 | List | The range goes from Kafka to Power BI. | Every other project, with its picture. |
 | Path (pinned) | I understand data from both ends. | Analyst, instructor, data scientist, engineer, each with real work. |
-| Teaching (sentence) | I still teach it. | 2022, 100+ students, 5 tools, 95% satisfaction (resume). |
+| Teaching (sentence) | I still teach it. | 2022, 50+ students, 5 tools, 95% satisfaction (resume). |
 | Contact (one field) | Hire me, learn from me, or bring me a data problem. | One field that opens an email. |
 | Footer | Made in Accra. | Independence Arch, credited. |
 

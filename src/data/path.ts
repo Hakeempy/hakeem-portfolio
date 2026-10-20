@@ -22,7 +22,7 @@ export const path: Stage[] = [
     where: "Self-employed",
     years: "2022 to now",
     sentence:
-      "I have taught Excel, Power BI, Tableau, SQL and Python to more than 100 students and professionals, and I consult for clients alongside it.",
+      "I have taught Excel, Power BI, Tableau, SQL and Python to more than 50 students and professionals, and I consult for clients alongside it.",
     scene: "instructor",
   },
   {

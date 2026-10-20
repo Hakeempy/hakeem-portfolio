@@ -17,7 +17,7 @@ export function InstructorScene() {
     <StoryScene label="Animation: a chart is drawn on a board while learners in a room light up one by one, from Excel and SQL to Python">
       {(still) => (
         <>
-          <Stage caption="100+ students and professionals" />
+          <Stage caption="50+ students and professionals" />
           {/* The board */}
           <rect x="50" y="78" width="250" height="116" fill={C.panel} />
           <path
@@ -53,7 +53,7 @@ export function InstructorScene() {
               { name: "Excel", role: "first steps" },
               { name: "SQL", role: "querying" },
               { name: "Python", role: "analysis", icon: "python" },
-              { name: "Learners", role: "100+ taught" },
+              { name: "Learners", role: "50+ taught" },
             ]}
           />
           {[0, 1].map((i) => (

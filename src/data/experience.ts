@@ -54,7 +54,7 @@ export const experience: Role[] = [
     start: "2022",
     end: "Present",
     highlights: [
-      "Designed and taught data analytics courses to 100+ students and professionals.",
+      "Designed and taught data analytics courses to 50+ students and professionals.",
       "Excel, Power BI, Tableau, SQL and Python, with a 95% satisfaction rate.",
       "Ongoing consulting for clients.",
     ],
