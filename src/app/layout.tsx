@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { site } from "@/data/site";
 import { InlineScript, themeScript } from "@/components/theme/InlineScript";
+import { BackToTop } from "@/components/ui/BackToTop";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -23,7 +24,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           href="https://api.fontshare.com/v2/css?f[]=switzer@400,500&display=swap"
         />
       </head>
-      <body className="min-h-svh">{children}</body>
+      <body className="min-h-svh">
+        {children}
+        <BackToTop />
+      </body>
     </html>
   );
 }
