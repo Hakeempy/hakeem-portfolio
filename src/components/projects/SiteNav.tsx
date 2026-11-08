@@ -3,7 +3,7 @@ import { site } from "@/data/site";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 /** The plain bar for pages other than home: wordmark, three links, one action. */
-export function SiteNav({ current }: { current?: "projects" }) {
+export function SiteNav({ current }: { current?: "projects" | "courses" }) {
   return (
     <nav
       aria-label="Main"
@@ -30,8 +30,12 @@ export function SiteNav({ current }: { current?: "projects" }) {
             </Link>
           </li>
           <li>
-            <Link className="link hover:text-ink" href="/#courses">
-              Courses
+            <Link
+              className={`link hover:text-ink ${current === "courses" ? "text-ink" : ""}`}
+              href="/courses"
+              aria-current={current === "courses" ? "page" : undefined}
+            >
+              Courses &amp; consulting
             </Link>
           </li>
         </ul>

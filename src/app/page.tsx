@@ -3,7 +3,7 @@ import { WorkPanels } from "@/components/sections/WorkPanels";
 import { LivePipeline } from "@/components/sections/LivePipeline";
 import { WorkList } from "@/components/sections/WorkList";
 import { Path } from "@/components/sections/Path";
-import { Teaching } from "@/components/sections/Teaching";
+import { CoursesBand } from "@/components/sections/CoursesBand";
 import { Certification } from "@/components/sections/Certification";
 import { Toolkit } from "@/components/sections/Toolkit";
 import { Contact } from "@/components/sections/Contact";
@@ -38,7 +38,7 @@ export default function Home() {
         <Path />
         <Certification />
         <Toolkit />
-        <Teaching />
+        <CoursesBand />
         <Contact />
       </main>
       <Footer />

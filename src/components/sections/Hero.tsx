@@ -37,9 +37,9 @@ export function Hero() {
               </a>
             </li>
             <li>
-              <a className="link hover:text-ink" href="#courses">
-                Courses
-              </a>
+              <Link className="link hover:text-ink" href="/courses">
+                Courses &amp; consulting
+              </Link>
             </li>
           </ul>
         </div>

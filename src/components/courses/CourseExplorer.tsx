@@ -35,12 +35,10 @@ export function CourseExplorer({
   courses,
   email,
   audience,
-  consulting,
 }: {
   courses: ExplorerCourse[];
   email: string;
   audience: string;
-  consulting: string;
 }) {
   const reduce = useReducedMotion() ?? false;
   const [active, setActive] = useState(0);
@@ -168,12 +166,8 @@ export function CourseExplorer({
           <dd className="mt-1">{audience}</dd>
         </div>
         <div>
-          <dt className="text-small text-muted">Each course</dt>
-          <dd className="mt-1">Five modules, from the first lesson to advanced work</dd>
-        </div>
-        <div>
-          <dt className="text-small text-muted">Consulting</dt>
-          <dd className="mt-1">{consulting}</dd>
+          <dt className="text-small text-muted">This course</dt>
+          <dd className="mt-1">{course.modules.length} modules, from the first lesson to advanced work</dd>
         </div>
         <div className="pt-2">
           <a href={ask} className="button">
