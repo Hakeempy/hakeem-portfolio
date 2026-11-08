@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { site } from "@/data/site";
 import { Reveal } from "@/components/motion/Reveal";
+import { FullWidthName } from "@/components/ui/FullWidthName";
 
 export function Footer() {
   return (
@@ -41,9 +42,7 @@ export function Footer() {
       </div>
 
       <Reveal className="absolute inset-x-0 bottom-0 px-margin pb-6">
-        <p aria-hidden data-reveal className="text-display leading-[0.8] font-medium tracking-[-0.045em] whitespace-nowrap">
-          {site.name}
-        </p>
+        <FullWidthName className="leading-[0.8]" />
         <p className="mt-5 text-small text-muted">
           &copy; 2026 {site.name}. Photograph:{" "}
           <a

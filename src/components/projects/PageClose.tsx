@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { site } from "@/data/site";
 import { Reveal } from "@/components/motion/Reveal";
+import { FullWidthName } from "@/components/ui/FullWidthName";
 
 /** The close for the project pages: an invitation, the ways to reach Hakeem, and the name at full width. */
 export function PageClose() {
@@ -37,14 +38,7 @@ export function PageClose() {
       </Reveal>
 
       <Reveal className="mt-[clamp(96px,12vw,200px)]">
-        <p
-          aria-hidden
-          data-reveal
-          className="text-display leading-[0.9] font-medium tracking-[-0.045em] sm:whitespace-nowrap"
-        >
-          {/* On phones the name breaks onto two lines rather than running off the edge */}
-          {site.name}
-        </p>
+        <FullWidthName className="leading-[0.9]" />
         <p className="mt-5 text-small text-muted">
           &copy; 2026 {site.name}. Made in {site.location}.
         </p>
